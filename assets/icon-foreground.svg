@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="tileShine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="35%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.22"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Android adaptive icon ön katmanı: şeffaf zemin, desen güvenli bölgede (orta %66) -->
+  <g>
+    <rect x="242" y="242" width="160" height="160" rx="22" fill="#1fa9a6"/>
+    <rect x="242" y="242" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+    <rect x="432" y="242" width="160" height="160" rx="22" fill="#d4af37"/>
+    <rect x="432" y="242" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+    <rect x="622" y="242" width="160" height="160" rx="22" fill="#c1483b"/>
+    <rect x="622" y="242" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+
+    <rect x="242" y="432" width="160" height="160" rx="22" fill="#8a5a9e"/>
+    <rect x="242" y="432" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+    <rect x="432" y="432" width="160" height="160" rx="22" fill="#d4af37"/>
+    <rect x="432" y="432" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+    <rect x="622" y="432" width="160" height="160" rx="22" fill="#3e7cb1"/>
+    <rect x="622" y="432" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+
+    <rect x="242" y="622" width="160" height="160" rx="22" fill="#1fa9a6"/>
+    <rect x="242" y="622" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+    <rect x="432" y="622" width="160" height="160" rx="22" fill="#c1483b"/>
+    <rect x="432" y="622" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+    <rect x="622" y="622" width="160" height="160" rx="22" fill="#ede4cf" fill-opacity="0.06" stroke="#ede4cf" stroke-opacity="0.28" stroke-width="4" stroke-dasharray="14 12"/>
+  </g>
+
+  <g fill="none" stroke="#ffffff" stroke-opacity="0.4" stroke-width="4">
+    <rect x="277" y="277" width="90" height="90" rx="10"/>
+    <rect x="467" y="277" width="90" height="90" rx="10"/>
+    <rect x="657" y="277" width="90" height="90" rx="10"/>
+    <rect x="277" y="467" width="90" height="90" rx="10"/>
+    <rect x="467" y="467" width="90" height="90" rx="10"/>
+    <rect x="657" y="467" width="90" height="90" rx="10"/>
+    <rect x="277" y="657" width="90" height="90" rx="10"/>
+    <rect x="467" y="657" width="90" height="90" rx="10"/>
+  </g>
+</svg>

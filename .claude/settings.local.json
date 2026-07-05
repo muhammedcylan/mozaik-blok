@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(npm *)",
+      "PowerShell(node scripts/render-assets.mjs)",
+      "PowerShell(git *)",
+      "PowerShell(npx cap add android)",
+      "PowerShell(npx cap add ios)",
+      "PowerShell(npx capacitor-assets generate)",
+      "PowerShell(npx cap sync)"
+    ]
+  }
+}

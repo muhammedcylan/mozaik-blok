@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="bgGlow" cx="30%" cy="20%" r="90%">
+      <stop offset="0%" stop-color="#163257"/>
+      <stop offset="100%" stop-color="#0b1f3a"/>
+    </radialGradient>
+    <linearGradient id="tileShine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="35%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.22"/>
+    </linearGradient>
+  </defs>
+
+  <!-- zemin -->
+  <rect width="1024" height="1024" fill="url(#bgGlow)"/>
+
+  <!-- altın çerçeve -->
+  <rect x="52" y="52" width="920" height="920" rx="96" fill="none" stroke="#d4af37" stroke-opacity="0.55" stroke-width="10"/>
+  <rect x="80" y="80" width="864" height="864" rx="80" fill="none" stroke="#d4af37" stroke-opacity="0.25" stroke-width="4"/>
+
+  <!-- 3x3 mozaik: bir köşe boş (blok bulmaca hissi) -->
+  <g>
+    <!-- satır 1 -->
+    <rect x="242" y="242" width="160" height="160" rx="22" fill="#1fa9a6"/>
+    <rect x="242" y="242" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+    <rect x="432" y="242" width="160" height="160" rx="22" fill="#d4af37"/>
+    <rect x="432" y="242" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+    <rect x="622" y="242" width="160" height="160" rx="22" fill="#c1483b"/>
+    <rect x="622" y="242" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+    <!-- satır 2 -->
+    <rect x="242" y="432" width="160" height="160" rx="22" fill="#8a5a9e"/>
+    <rect x="242" y="432" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+    <rect x="432" y="432" width="160" height="160" rx="22" fill="#d4af37"/>
+    <rect x="432" y="432" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+    <rect x="622" y="432" width="160" height="160" rx="22" fill="#3e7cb1"/>
+    <rect x="622" y="432" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+    <!-- satır 3: sağ alt köşe boş -->
+    <rect x="242" y="622" width="160" height="160" rx="22" fill="#1fa9a6"/>
+    <rect x="242" y="622" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+    <rect x="432" y="622" width="160" height="160" rx="22" fill="#c1483b"/>
+    <rect x="432" y="622" width="160" height="160" rx="22" fill="url(#tileShine)"/>
+    <!-- boş hücre: sadece hat -->
+    <rect x="622" y="622" width="160" height="160" rx="22" fill="#ede4cf" fill-opacity="0.06" stroke="#ede4cf" stroke-opacity="0.28" stroke-width="4" stroke-dasharray="14 12"/>
+  </g>
+
+  <!-- çini iç detayları -->
+  <g fill="none" stroke="#ffffff" stroke-opacity="0.4" stroke-width="4">
+    <rect x="277" y="277" width="90" height="90" rx="10"/>
+    <rect x="467" y="277" width="90" height="90" rx="10"/>
+    <rect x="657" y="277" width="90" height="90" rx="10"/>
+    <rect x="277" y="467" width="90" height="90" rx="10"/>
+    <rect x="467" y="467" width="90" height="90" rx="10"/>
+    <rect x="657" y="467" width="90" height="90" rx="10"/>
+    <rect x="277" y="657" width="90" height="90" rx="10"/>
+    <rect x="467" y="657" width="90" height="90" rx="10"/>
+  </g>
+</svg>

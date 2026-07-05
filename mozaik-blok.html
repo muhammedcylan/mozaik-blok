@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mozaik Blok — Bulmaca Oyunu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0b1f3a;
+    --bg2: #0f2747;
+    --panel: #122a4d;
+    --turquoise: #1fa9a6;
+    --gold: #d4af37;
+    --coral: #c1483b;
+    --plum: #8a5a9e;
+    --steel: #3e7cb1;
+    --cream: #ede4cf;
+    --line: rgba(237,228,207,0.10);
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:
+      radial-gradient(ellipse at 20% -10%, #163257 0%, transparent 55%),
+      radial-gradient(ellipse at 100% 110%, #0d2140 0%, transparent 50%),
+      var(--bg);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    overflow-x:hidden;
+    user-select:none;
+  }
+  .app{
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 22px 16px 40px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-height:100%;
+  }
+  header{ width:100%; text-align:center; margin-bottom:18px; }
+  h1{
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size: clamp(28px, 8vw, 38px);
+    letter-spacing: 3px;
+    margin:0;
+    color: var(--gold);
+    text-shadow: 0 0 18px rgba(212,175,55,0.35);
+  }
+  h1 span{
+    display:block;
+    font-family:'Inter', sans-serif;
+    font-weight:500;
+    font-size: 12px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--turquoise);
+    margin-top:4px;
+  }
+  .scores{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    margin-top:16px;
+  }
+  .score-box{
+    background: linear-gradient(180deg, var(--panel), var(--bg2));
+    border: 1px solid rgba(212,175,55,0.25);
+    border-radius: 12px;
+    padding: 8px 22px;
+    min-width: 96px;
+    text-align:center;
+  }
+  .score-box .label{
+    display:block;
+    font-size:10px;
+    letter-spacing:2px;
+    color: var(--turquoise);
+    margin-bottom:2px;
+  }
+  .score-box span:last-child{
+    font-size:22px;
+    font-weight:700;
+    color: var(--cream);
+    font-variant-numeric: tabular-nums;
+  }
+  .board-wrap{
+    width:100%;
+    display:flex;
+    justify-content:center;
+    margin-top: 22px;
+  }
+  .grid{
+    --gap: 4px;
+    display:grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    gap: var(--gap);
+    width: min(92vw, 420px);
+    aspect-ratio: 1/1;
+    padding: 10px;
+    border-radius: 16px;
+    background:
+      repeating-conic-gradient(from 45deg, rgba(237,228,207,0.035) 0% 25%, transparent 0% 50%) 0 0/28px 28px,
+      var(--bg2);
+    border: 1px solid rgba(212,175,55,0.3);
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.35), 0 10px 30px rgba(0,0,0,0.4);
+    touch-action: none;
+    position: relative;
+  }
+  .cell{
+    border-radius: 5px;
+    background: rgba(237,228,207,0.045);
+    border: 1px solid var(--line);
+    position: relative;
+    transition: background 0.12s ease, transform 0.12s ease;
+  }
+  .cell.filled{
+    border: 1px solid rgba(255,255,255,0.25);
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.15), inset 0 -3px 4px rgba(0,0,0,0.25), inset 0 2px 3px rgba(255,255,255,0.25);
+  }
+  .cell.filled::after{
+    content:'';
+    position:absolute; inset: 22%;
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 3px;
+    opacity:0.6;
+  }
+  .cell.preview-valid{ background: rgba(31,169,166,0.35); border-color: rgba(31,169,166,0.7); }
+  .cell.preview-invalid{ background: rgba(193,72,59,0.35); border-color: rgba(193,72,59,0.7); }
+  .cell.clearing{
+    animation: shatter 0.38s ease forwards;
+    z-index: 2;
+  }
+  @keyframes shatter{
+    0%{ transform:scale(1); filter:brightness(1); }
+    40%{ transform:scale(1.12); filter:brightness(2.2); box-shadow:0 0 14px 4px rgba(212,175,55,0.8); }
+    100%{ transform:scale(0.2); filter:brightness(2.6); opacity:0; }
+  }
+  .tray{
+    width: min(92vw, 420px);
+    display:flex;
+    justify-content:space-between;
+    gap: 10px;
+    margin-top: 22px;
+    min-height: 100px;
+  }
+  .piece-slot{
+    flex:1;
+    background: linear-gradient(180deg, var(--panel), var(--bg2));
+    border: 1px solid rgba(212,175,55,0.18);
+    border-radius: 12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height: 100px;
+    position: relative;
+  }
+  .piece{
+    display:grid;
+    cursor: grab;
+    touch-action: none;
+  }
+  .piece.used{ opacity:0; pointer-events:none; }
+  .piece.dragging-source{ opacity:0.25; }
+  .piece-cell{
+    border-radius: 3px;
+    box-shadow: inset 0 -2px 3px rgba(0,0,0,0.25), inset 0 2px 2px rgba(255,255,255,0.25);
+  }
+  .ghost{
+    position: fixed;
+    top:0; left:0;
+    display:grid;
+    pointer-events:none;
+    z-index: 999;
+    opacity: 0.92;
+    filter: drop-shadow(0 8px 14px rgba(0,0,0,0.5));
+  }
+  .ghost.hidden{ display:none; }
+  .ghost-cell{
+    border-radius: 5px;
+    box-shadow: inset 0 -3px 4px rgba(0,0,0,0.25), inset 0 2px 3px rgba(255,255,255,0.25);
+  }
+  .overlay{
+    position: fixed; inset:0;
+    background: rgba(6,14,28,0.82);
+    display:flex; align-items:center; justify-content:center;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+  }
+  .overlay.hidden{ display:none; }
+  .overlay-card{
+    background: linear-gradient(180deg, var(--panel), var(--bg2));
+    border: 1px solid rgba(212,175,55,0.4);
+    border-radius: 18px;
+    padding: 32px 36px;
+    text-align:center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .overlay-card h2{
+    font-family:'Cinzel', serif;
+    color: var(--coral);
+    letter-spacing:2px;
+    margin: 0 0 10px;
+  }
+  .overlay-card p{ margin: 0 0 20px; color: var(--cream); font-size:15px; }
+  .overlay-card span{ color: var(--gold); font-weight:700; }
+  #restartBtn{
+    background: linear-gradient(180deg, var(--turquoise), #167f7d);
+    border: none;
+    color: #08221f;
+    font-weight:700;
+    letter-spacing:1px;
+    padding: 12px 28px;
+    border-radius: 999px;
+    font-size:14px;
+    cursor:pointer;
+    box-shadow: 0 6px 16px rgba(31,169,166,0.4);
+  }
+  #restartBtn:active{ transform: scale(0.97); }
+  footer.hint{
+    margin-top:18px;
+    font-size:11px;
+    letter-spacing:1px;
+    color: rgba(237,228,207,0.45);
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>MOZAİK<span>blok bulmaca</span></h1>
+    <div class="scores">
+      <div class="score-box"><span class="label">SKOR</span><span id="score">0</span></div>
+      <div class="score-box"><span class="label">REKOR</span><span id="best">0</span></div>
+    </div>
+  </header>
+
+  <div class="board-wrap">
+    <div id="grid" class="grid"></div>
+  </div>
+
+  <div id="tray" class="tray"></div>
+
+  <footer class="hint">parçayı sürükleyip ızgaraya bırak · satır veya sütunu doldur, temizle</footer>
+</div>
+
+<div id="ghost" class="ghost hidden"></div>
+
+<div id="gameover" class="overlay hidden">
+  <div class="overlay-card">
+    <h2>OYUN BİTTİ</h2>
+    <p>Skorun: <span id="finalScore">0</span></p>
+    <button id="restartBtn">Yeniden Başla</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const SIZE = 8;
+  const PALETTE = ['#1fa9a6', '#d4af37', '#c1483b', '#8a5a9e', '#3e7cb1'];
+
+  const SHAPES = [
+    [[0,0]],
+    [[0,0],[0,1]],
+    [[0,0],[1,0]],
+    [[0,0],[0,1],[0,2]],
+    [[0,0],[1,0],[2,0]],
+    [[0,0],[0,1],[0,2],[0,3]],
+    [[0,0],[1,0],[2,0],[3,0]],
+    [[0,0],[0,1],[0,2],[0,3],[0,4]],
+    [[0,0],[1,0],[2,0],[3,0],[4,0]],
+    [[0,0],[0,1],[1,0],[1,1]],
+    [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]],
+    [[0,0],[1,0],[2,0],[2,1]],
+    [[0,0],[0,1],[0,2],[1,0]],
+    [[0,0],[0,1],[1,1],[2,1]],
+    [[0,2],[1,2],[1,1],[1,0]],
+    [[0,0],[0,1],[1,0]],
+    [[0,0],[0,1],[1,1]],
+    [[0,0],[1,0],[1,1]],
+    [[0,1],[1,0],[1,1]],
+    [[0,1],[0,2],[1,0],[1,1]],
+    [[0,0],[0,1],[1,1],[1,2]],
+    [[0,0],[0,1],[0,2],[1,1]],
+    [[0,1],[1,0],[1,1],[1,2],[2,1]]
+  ];
+
+  let grid = Array.from({length:SIZE}, ()=>Array(SIZE).fill(null));
+  let pieces = [];
+  let score = 0;
+  let best = 0;
+  let cellSize = 0;
+  let gridRect = null;
+  let dragging = null;
+
+  const gridEl = document.getElementById('grid');
+  const trayEl = document.getElementById('tray');
+  const ghostEl = document.getElementById('ghost');
+  const scoreEl = document.getElementById('score');
+  const bestEl = document.getElementById('best');
+  const overlayEl = document.getElementById('gameover');
+  const finalScoreEl = document.getElementById('finalScore');
+
+  function buildGridDom(){
+    gridEl.innerHTML = '';
+    for(let r=0;r<SIZE;r++){
+      for(let c=0;c<SIZE;c++){
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.r = r;
+        cell.dataset.c = c;
+        gridEl.appendChild(cell);
+      }
+    }
+  }
+
+  function cellEl(r,c){
+    return gridEl.children[r*SIZE+c];
+  }
+
+  function renderGrid(){
+    for(let r=0;r<SIZE;r++){
+      for(let c=0;c<SIZE;c++){
+        const el = cellEl(r,c);
+        const val = grid[r][c];
+        el.classList.toggle('filled', !!val);
+        el.style.background = val ? val : '';
+      }
+    }
+  }
+
+  function randomShape(){
+    const shape = SHAPES[Math.floor(Math.random()*SHAPES.length)];
+    const color = PALETTE[Math.floor(Math.random()*PALETTE.length)];
+    return { shape, color, used:false };
+  }
+
+  function newPieceSet(){
+    pieces = [randomShape(), randomShape(), randomShape()];
+    renderTray();
+    checkGameOver();
+  }
+
+  function shapeDims(shape){
+    const maxR = Math.max(...shape.map(p=>p[0]));
+    const maxC = Math.max(...shape.map(p=>p[1]));
+    return { rows: maxR+1, cols: maxC+1 };
+  }
+
+  function renderTray(){
+    trayEl.innerHTML = '';
+    pieces.forEach((p, idx)=>{
+      const slot = document.createElement('div');
+      slot.className = 'piece-slot';
+      if(!p.used){
+        const { rows, cols } = shapeDims(p.shape);
+        const mini = 17;
+        const pieceEl = document.createElement('div');
+        pieceEl.className = 'piece';
+        pieceEl.style.gridTemplateColumns = `repeat(${cols}, ${mini}px)`;
+        pieceEl.style.gridTemplateRows = `repeat(${rows}, ${mini}px)`;
+        pieceEl.style.gap = '2px';
+        for(let r=0;r<rows;r++){
+          for(let c=0;c<cols;c++){
+            const has = p.shape.some(([dr,dc])=>dr===r&&dc===c);
+            const cd = document.createElement('div');
+            if(has){
+              cd.className = 'piece-cell';
+              cd.style.background = p.color;
+            }
+            pieceEl.appendChild(cd);
+          }
+        }
+        pieceEl.addEventListener('pointerdown', (e)=>startDrag(e, idx, pieceEl));
+        slot.appendChild(pieceEl);
+      }
+      trayEl.appendChild(slot);
+    });
+  }
+
+  function updateGridRect(){
+    gridRect = gridEl.getBoundingClientRect();
+    cellSize = (gridRect.width - 20) / SIZE; // minus padding(10*2)
+  }
+
+  function buildGhost(shape, color){
+    const { rows, cols } = shapeDims(shape);
+    ghostEl.innerHTML = '';
+    ghostEl.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
+    ghostEl.style.gridTemplateRows = `repeat(${rows}, ${cellSize}px)`;
+    ghostEl.style.gap = '4px';
+    ghostEl.dataset.rows = rows;
+    ghostEl.dataset.cols = cols;
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const has = shape.some(([dr,dc])=>dr===r&&dc===c);
+        const cd = document.createElement('div');
+        if(has){
+          cd.className = 'ghost-cell';
+          cd.style.background = color;
+          cd.style.width = cellSize+'px';
+          cd.style.height = cellSize+'px';
+        }
+        ghostEl.appendChild(cd);
+      }
+    }
+    ghostEl.classList.remove('hidden');
+  }
+
+  function computeAnchor(clientX, clientY){
+    const rows = parseInt(ghostEl.dataset.rows);
+    const cols = parseInt(ghostEl.dataset.cols);
+    const w = cols*cellSize + (cols-1)*4;
+    const h = rows*cellSize + (rows-1)*4;
+    const lift = 90;
+    const left = clientX - w/2;
+    const top = clientY - lift - h/2;
+    const col = Math.round((left - (gridRect.left+10)) / (cellSize+ (4*(cellSize/cellSize)) ));
+    const row = Math.round((top - (gridRect.top+10)) / (cellSize+4));
+    return { row, col, left, top };
+  }
+
+  function canPlace(shape, r0, c0){
+    for(const [dr,dc] of shape){
+      const rr = r0+dr, cc = c0+dc;
+      if(rr<0||rr>=SIZE||cc<0||cc>=SIZE) return false;
+      if(grid[rr][cc]) return false;
+    }
+    return true;
+  }
+
+  function clearPreview(){
+    for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){
+      cellEl(r,c).classList.remove('preview-valid','preview-invalid');
+    }
+  }
+
+  function showPreview(shape, r0, c0){
+    clearPreview();
+    const valid = canPlace(shape, r0, c0);
+    shape.forEach(([dr,dc])=>{
+      const rr=r0+dr, cc=c0+dc;
+      if(rr>=0&&rr<SIZE&&cc>=0&&cc<SIZE){
+        cellEl(rr,cc).classList.add(valid?'preview-valid':'preview-invalid');
+      }
+    });
+    return valid;
+  }
+
+  function startDrag(e, idx, pieceEl){
+    if(pieces[idx].used) return;
+    e.preventDefault();
+    updateGridRect();
+    dragging = { idx, shape: pieces[idx].shape, color: pieces[idx].color };
+    buildGhost(dragging.shape, dragging.color);
+    moveGhost(e.clientX, e.clientY);
+    pieceEl.classList.add('dragging-source');
+    dragging.sourceEl = pieceEl;
+    document.body.style.cursor = 'grabbing';
+  }
+
+  function moveGhost(clientX, clientY){
+    if(!dragging) return;
+    const { row, col, left, top } = computeAnchor(clientX, clientY);
+    ghostEl.style.left = left + 'px';
+    ghostEl.style.top = top + 'px';
+    showPreview(dragging.shape, row, col);
+    dragging.lastRow = row;
+    dragging.lastCol = col;
+  }
+
+  function endDrag(){
+    if(!dragging) return;
+    const { idx, shape, lastRow, lastCol, sourceEl } = dragging;
+    const valid = canPlace(shape, lastRow, lastCol);
+    if(valid){
+      shape.forEach(([dr,dc])=>{
+        grid[lastRow+dr][lastCol+dc] = dragging.color;
+      });
+      score += shape.length;
+      pieces[idx].used = true;
+      renderGrid();
+      checkClears();
+      updateScoreUI();
+      if(pieces.every(p=>p.used)){
+        setTimeout(newPieceSet, 120);
+      } else {
+        renderTray();
+        checkGameOver();
+      }
+    }
+    if(sourceEl) sourceEl.classList.remove('dragging-source');
+    clearPreview();
+    ghostEl.classList.add('hidden');
+    document.body.style.cursor = '';
+    dragging = null;
+  }
+
+  function checkClears(){
+    const rows = [];
+    const cols = [];
+    for(let r=0;r<SIZE;r++) if(grid[r].every(v=>v)) rows.push(r);
+    for(let c=0;c<SIZE;c++) if(grid.every(row=>row[c])) cols.push(c);
+    if(!rows.length && !cols.length) return;
+
+    const cellsToClear = new Set();
+    rows.forEach(r=>{ for(let c=0;c<SIZE;c++) cellsToClear.add(r+'_'+c); });
+    cols.forEach(c=>{ for(let r=0;r<SIZE;r++) cellsToClear.add(r+'_'+c); });
+
+    cellsToClear.forEach(key=>{
+      const [r,c] = key.split('_').map(Number);
+      cellEl(r,c).classList.add('clearing');
+    });
+
+    const totalLines = rows.length + cols.length;
+    score += totalLines*100 + (totalLines>1 ? (totalLines-1)*50 : 0);
+    updateScoreUI();
+
+    setTimeout(()=>{
+      cellsToClear.forEach(key=>{
+        const [r,c] = key.split('_').map(Number);
+        grid[r][c] = null;
+        cellEl(r,c).classList.remove('clearing');
+      });
+      renderGrid();
+    }, 380);
+  }
+
+  function checkGameOver(){
+    const active = pieces.filter(p=>!p.used);
+    const anyFits = active.some(p=>{
+      for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){
+        if(canPlace(p.shape, r, c)) return true;
+      }
+      return false;
+    });
+    if(!anyFits && active.length>0){
+      showGameOver();
+    }
+  }
+
+  function updateScoreUI(){
+    scoreEl.textContent = score;
+    if(score>best){ best = score; bestEl.textContent = best; }
+  }
+
+  function showGameOver(){
+    finalScoreEl.textContent = score;
+    overlayEl.classList.remove('hidden');
+  }
+
+  function resetGame(){
+    grid = Array.from({length:SIZE}, ()=>Array(SIZE).fill(null));
+    score = 0;
+    updateScoreUI();
+    overlayEl.classList.add('hidden');
+    renderGrid();
+    newPieceSet();
+  }
+
+  window.addEventListener('pointermove', (e)=> moveGhost(e.clientX, e.clientY));
+  window.addEventListener('pointerup', endDrag);
+  window.addEventListener('pointercancel', endDrag);
+  document.getElementById('restartBtn').addEventListener('click', resetGame);
+  window.addEventListener('resize', ()=>{ if(!dragging) updateGridRect(); });
+
+  buildGridDom();
+  renderGrid();
+  newPieceSet();
+})();
+</script>
+</body>
+</html>

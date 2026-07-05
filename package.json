@@ -1,0 +1,30 @@
+{
+  "name": "mozaik-blok",
+  "version": "1.0.0",
+  "description": "Mozaik Blok — 8x8 blok bulmaca oyunu (Block Blast tarzı)",
+  "private": true,
+  "scripts": {
+    "sync": "cap sync",
+    "open:android": "cap open android",
+    "run:android": "cap run android",
+    "assets": "node scripts/render-assets.mjs && capacitor-assets generate"
+  },
+  "keywords": [
+    "game",
+    "puzzle",
+    "capacitor"
+  ],
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/cli": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/ios": "^8.4.1",
+    "@capacitor/preferences": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5"
+  }
+}

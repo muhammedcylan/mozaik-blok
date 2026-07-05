@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2732" height="2732" viewBox="0 0 2732 2732">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="42%" r="75%">
+      <stop offset="0%" stop-color="#163257"/>
+      <stop offset="100%" stop-color="#0b1f3a"/>
+    </radialGradient>
+    <linearGradient id="tileShine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="35%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.22"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="2732" height="2732" fill="url(#bgGlow)"/>
+
+  <!-- merkez mozaik amblemi (kenarlardan uzak: her cihazda kırpılmadan görünür) -->
+  <g transform="translate(1366,1366)">
+    <!-- altın halka -->
+    <circle r="560" fill="none" stroke="#d4af37" stroke-opacity="0.4" stroke-width="10"/>
+    <circle r="520" fill="none" stroke="#d4af37" stroke-opacity="0.18" stroke-width="4"/>
+
+    <!-- 3x3 mozaik -->
+    <g transform="translate(-405,-405)">
+      <rect x="0"   y="0"   width="250" height="250" rx="34" fill="#1fa9a6"/>
+      <rect x="0"   y="0"   width="250" height="250" rx="34" fill="url(#tileShine)"/>
+      <rect x="280" y="0"   width="250" height="250" rx="34" fill="#d4af37"/>
+      <rect x="280" y="0"   width="250" height="250" rx="34" fill="url(#tileShine)"/>
+      <rect x="560" y="0"   width="250" height="250" rx="34" fill="#c1483b"/>
+      <rect x="560" y="0"   width="250" height="250" rx="34" fill="url(#tileShine)"/>
+
+      <rect x="0"   y="280" width="250" height="250" rx="34" fill="#8a5a9e"/>
+      <rect x="0"   y="280" width="250" height="250" rx="34" fill="url(#tileShine)"/>
+      <rect x="280" y="280" width="250" height="250" rx="34" fill="#d4af37"/>
+      <rect x="280" y="280" width="250" height="250" rx="34" fill="url(#tileShine)"/>
+      <rect x="560" y="280" width="250" height="250" rx="34" fill="#3e7cb1"/>
+      <rect x="560" y="280" width="250" height="250" rx="34" fill="url(#tileShine)"/>
+
+      <rect x="0"   y="560" width="250" height="250" rx="34" fill="#1fa9a6"/>
+      <rect x="0"   y="560" width="250" height="250" rx="34" fill="url(#tileShine)"/>
+      <rect x="280" y="560" width="250" height="250" rx="34" fill="#c1483b"/>
+      <rect x="280" y="560" width="250" height="250" rx="34" fill="url(#tileShine)"/>
+      <rect x="560" y="560" width="250" height="250" rx="34" fill="#ede4cf" fill-opacity="0.06" stroke="#ede4cf" stroke-opacity="0.28" stroke-width="6" stroke-dasharray="20 16"/>
+
+      <!-- çini iç detayları -->
+      <g fill="none" stroke="#ffffff" stroke-opacity="0.4" stroke-width="6">
+        <rect x="55"  y="55"  width="140" height="140" rx="14"/>
+        <rect x="335" y="55"  width="140" height="140" rx="14"/>
+        <rect x="615" y="55"  width="140" height="140" rx="14"/>
+        <rect x="55"  y="335" width="140" height="140" rx="14"/>
+        <rect x="335" y="335" width="140" height="140" rx="14"/>
+        <rect x="615" y="335" width="140" height="140" rx="14"/>
+        <rect x="55"  y="615" width="140" height="140" rx="14"/>
+        <rect x="335" y="615" width="140" height="140" rx="14"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mozaik Blok</string>
+    <string name="title_activity_main">Mozaik Blok</string>
+    <string name="package_name">com.ceylan.mozaikblok</string>
+    <string name="custom_url_scheme">com.ceylan.mozaikblok</string>
+</resources>
