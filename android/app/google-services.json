@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1054850324550",
+    "project_id": "mozaik-6b8f1",
+    "storage_bucket": "mozaik-6b8f1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1054850324550:android:ab8fbacca1552f060f1247",
+        "android_client_info": {
+          "package_name": "com.ceylan.mozaikblok"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1054850324550-769ir6pqg0qg21ft4f0i27aan11cj8ei.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ceylan.mozaikblok",
+            "certificate_hash": "e48fc4fc689ffbd5b37dfa54c498c33ee85096ad"
+          }
+        },
+        {
+          "client_id": "1054850324550-25najm2sn40o5pbvltec0emop1cfo2t0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBqO774gMY8DVBWO1kwOorM2k51DNnVP2Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1054850324550-25najm2sn40o5pbvltec0emop1cfo2t0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
