@@ -10,7 +10,12 @@
       "PowerShell(npx cap sync)",
       "PowerShell(Test-Path *)",
       "PowerShell(Start-Process \"C:\\\\Users\\\\ceylan\\\\Desktop\\\\mozaik\\\\www\\\\index.html\")",
-      "PowerShell(Get-PSDrive C | Select-Object @{n='FreeGB';e={[math]::Round\\($_.Free/1GB,2\\)}}, @{n='UsedGB';e={[math]::Round\\($_.Used/1GB,2\\)}})"
+      "PowerShell(Get-PSDrive C | Select-Object @{n='FreeGB';e={[math]::Round\\($_.Free/1GB,2\\)}}, @{n='UsedGB';e={[math]::Round\\($_.Used/1GB,2\\)}})",
+      "PowerShell(gh auth *)",
+      "PowerShell(gh repo *)",
+      "PowerShell(gh api *)",
+      "PowerShell($url='https://muhammedcylan.github.io/mozaik-blok-pages/privacy-policy.html'; for\\($i=0;$i -lt 6;$i++\\){ try{ $r=Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 15; Write-Output \"OK $\\($r.StatusCode\\) - deneme $\\($i+1\\)\"; break } catch { Write-Output \"henuz yok \\(deneme $\\($i+1\\)\\)\"; Start-Sleep -Seconds 20 } })",
+      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; if \\(Test-Path $adb\\) { & $adb devices } else { Write-Output \"adb bulunamadi: $adb\" })"
     ]
   }
 }

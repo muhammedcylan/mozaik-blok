@@ -122,7 +122,8 @@ keytool -genkey -v -keystore mozaik-blok-release.keystore -alias mozaikblok -key
 
 ### 2. İmzalama yapılandırması
 
-`android/keystore.properties` dosyası oluştur (git'e girmez):
+Gradle tarafı **hazır** (`android/app/build.gradle` içinde koşullu signing config var).
+Tek yapman gereken `android/keystore.properties` dosyasını oluşturmak (git'e girmez):
 
 ```properties
 storeFile=C:\\guvenli\\yol\\mozaik-blok-release.keystore
@@ -131,27 +132,7 @@ keyAlias=mozaikblok
 keyPassword=SENIN_KEY_SIFREN
 ```
 
-`android/app/build.gradle` içinde `android {` bloğuna şunu ekle:
-
-```gradle
-    def keystorePropertiesFile = rootProject.file("keystore.properties")
-    def keystoreProperties = new Properties()
-    if (keystorePropertiesFile.exists()) {
-        keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-    }
-    signingConfigs {
-        release {
-            if (keystorePropertiesFile.exists()) {
-                storeFile file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
-            }
-        }
-    }
-```
-
-ve `buildTypes.release` içine: `signingConfig signingConfigs.release`
+Dosya yokken derleme normal çalışır; dosyayı koyduğun an `bundleRelease` imzalı çıkar.
 
 ### 3. Sürüm bilgileri
 
