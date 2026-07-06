@@ -180,10 +180,11 @@ Hazır sayfalar repoda: `docs/privacy-policy.html` ve `docs/terms.html`. İçeri
 liderlik tablosunu da kapsıyor (Firebase'de saklanan hesap kimliği + takma ad + skor).
 Uygulama içinde de ilk açılışta bu metinlerin özeti gösterilip kabul alınıyor.
 
-Yayınlama (herkese açık bir URL olmalı):
-- **GitHub Pages** (ücretsiz, en pratik): repoyu GitHub'a yükle, Settings > Pages'ten
-  `docs/` klasörünü yayınla → `https://kullanici.github.io/mozaik-blok/privacy-policy.html`
-- Alternatif: kendi domain'in, Google Sites, Notion public sayfası.
+**Yayınlandı (canlı URL'ler):**
+- Gizlilik politikası: https://muhammedcylan.github.io/mozaik-blok-pages/privacy-policy.html
+- Kullanım koşulları: https://muhammedcylan.github.io/mozaik-blok-pages/terms.html
+- Kaynak: `mozaik-blok-pages` public reposu (masaüstünde `mozaik-blok-pages` klasörü);
+  metin değişirse orada düzenleyip push et — `docs/` içindeki kopyaları da eşitle.
 
 Play Console'da: **Uygulama içeriği (App content) > Gizlilik politikası** alanına bu
 URL'yi gir. **Data Safety formunda artık "veri toplanıyor" beyan etmelisin** (liderlik
