@@ -9,6 +9,10 @@ const config: CapacitorConfig = {
   appName: 'Mozaik Blok',
   webDir: 'www',
   plugins: {
+    FirebaseAuthentication: {
+      skipNativeAuth: false,
+      providers: ['google.com', 'apple.com'],
+    },
     SplashScreen: {
       launchShowDuration: 2000,
       launchAutoHide: true,

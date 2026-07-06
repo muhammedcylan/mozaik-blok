@@ -173,25 +173,24 @@ Console'a yüklersin.
 
 ### 5. Privacy Policy (zorunlu!)
 
-**Evet, gerekli.** Reklam ve veri toplama olmasa bile Google Play, Data Safety formu
-ve her uygulama için erişilebilir bir gizlilik politikası URL'si ister; Play Console
-uygulama kaydında "Privacy policy" alanı boş bırakılamaz.
+**Evet, gerekli.** Google Play her uygulama için erişilebilir bir gizlilik politikası
+URL'si ister; Play Console'da "Privacy policy" alanı boş bırakılamaz.
 
-Bu oyun için durum kolay: hiçbir kişisel veri toplanmıyor, tek saklanan şey cihazda
-kalan rekor skor. Politika metni 5-6 cümle yeter:
+Hazır sayfalar repoda: `docs/privacy-policy.html` ve `docs/terms.html`. İçerik,
+liderlik tablosunu da kapsıyor (Firebase'de saklanan hesap kimliği + takma ad + skor).
+Uygulama içinde de ilk açılışta bu metinlerin özeti gösterilip kabul alınıyor.
 
-> Mozaik Blok hiçbir kişisel veri toplamaz, saklamaz veya üçüncü taraflarla paylaşmaz.
-> Yalnızca en yüksek skorunuz cihazınızda yerel olarak saklanır ve cihazınızdan
-> ayrılmaz. Uygulama reklam içermez, analitik kullanmaz ve internet bağlantısı
-> gerektirmez. (+ iletişim e-postası, tarih)
-
-Nereye koyacaksın (herkese açık bir URL olmalı):
-- **GitHub Pages** (ücretsiz, en pratik): repoya `docs/privacy-policy.html` koy,
-  Settings > Pages'ten yayınla → `https://kullanici.github.io/mozaik-blok/privacy-policy.html`
+Yayınlama (herkese açık bir URL olmalı):
+- **GitHub Pages** (ücretsiz, en pratik): repoyu GitHub'a yükle, Settings > Pages'ten
+  `docs/` klasörünü yayınla → `https://kullanici.github.io/mozaik-blok/privacy-policy.html`
 - Alternatif: kendi domain'in, Google Sites, Notion public sayfası.
 
 Play Console'da: **Uygulama içeriği (App content) > Gizlilik politikası** alanına bu
-URL'yi gir. Data Safety formunda "veri toplanmıyor / paylaşılmıyor" seç.
+URL'yi gir. **Data Safety formunda artık "veri toplanıyor" beyan etmelisin** (liderlik
+tablosu yüzünden): "Kişisel bilgiler > E-posta adresi" ve "Kimlik bilgileri > Kullanıcı
+kimlikleri" — amaç "Uygulama işlevselliği", paylaşım yok, şifreli aktarım evet,
+silme talebi mümkün evet. App Store Connect'te de "App Privacy" bölümünde aynı beyan
+yapılır ("Data Linked to You: Contact Info / Identifiers").
 
 ### 6. Play Console adımları (özet)
 
@@ -201,6 +200,77 @@ URL'yi gir. Data Safety formunda "veri toplanmıyor / paylaşılmıyor" seç.
 3. App content: privacy policy URL, Data Safety, içerik derecelendirme anketi
    (basit bulmaca → herkes/PEGI 3), hedef kitle
 4. AAB'yi önce **Internal testing**'e yükle, kendi cihazında dene, sonra Production'a terfi ettir
+
+---
+
+## Liderlik tablosu — Firebase kurulumu (bir kez yapılır, ücretsiz)
+
+Oyundaki 🏆 Liderlik özelliği (Google / Apple / e-posta girişi + dünya sıralaması)
+Google Firebase kullanır. Kod hazır; Firebase yapılandırılana kadar oyun içinde
+"liderlik henüz etkin değil" mesajı görünür, oyunun geri kalanı normal çalışır.
+
+### 1. Firebase projesi aç
+
+1. [console.firebase.google.com](https://console.firebase.google.com) → Google
+   hesabınla gir → **Create a project** (Analytics'i kapatabilirsin).
+2. Proje panelinde **Authentication > Sign-in method**: şu üçünü etkinleştir:
+   **Email/Password**, **Google**, **Apple**.
+3. **Firestore Database > Create database** → Production mode → bölge: `europe-west1`.
+4. Firestore **Rules** sekmesine şunu yapıştır ve Publish de:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+    match /leaderboard/{uid} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 3
+        && request.resource.data.name.size() <= 16
+        && request.resource.data.score is int
+        && request.resource.data.score >= 0;
+    }
+  }
+}
+```
+
+### 2. Android uygulamasını bağla
+
+1. Firebase konsolunda ⚙ > Project settings > **Add app > Android**.
+2. Package name: `com.ceylan.mozaikblok` (capacitor.config.ts'teki appId ile aynı).
+3. **SHA-1 ekle** (Google ile giriş bunun olmadan çalışmaz). Debug SHA-1'i almak için:
+   ```
+   cd android
+   .\gradlew signingReport
+   ```
+   Çıktıdaki `Variant: debug` altındaki SHA1 değerini Firebase'e ekle.
+   (Yayın öncesi release keystore'unun SHA-1'ini de ekleyeceksin:
+   `keytool -list -v -keystore mozaik-blok-release.keystore -alias mozaikblok`)
+4. **google-services.json** dosyasını indir → `android/app/` klasörüne koy.
+   Başka bir şey gerekmiyor; Gradle dosyayı görünce Firebase'i otomatik etkinleştirir.
+5. `npx cap sync` çalıştır, uygulamayı yeniden derle.
+
+### 3. iOS uygulamasını bağla (Mac'te)
+
+1. Firebase konsolunda **Add app > iOS**, bundle ID: `com.ceylan.mozaikblok`.
+2. **GoogleService-Info.plist** dosyasını indir → Xcode'da `App/App` klasörüne
+   sürükle ("Copy items if needed" işaretli).
+3. Google girişi için: plist içindeki `REVERSED_CLIENT_ID` değerini Xcode'da
+   **App target > Info > URL Types**'a yeni URL scheme olarak ekle.
+4. Apple girişi için: **Signing & Capabilities > + Capability > Sign in with Apple**
+   ekle (Apple Developer hesabında da etkinleştirilmiş olmalı).
+
+### Notlar
+
+- Ücretsiz Spark planı bu oyun için fazlasıyla yeterli (50K okuma/gün).
+- Apple ile giriş yalnızca iOS'ta gösterilir; Android'de Google + e-posta var.
+- Veri modeli: `users/{uid}` → takma ad; `leaderboard/{uid}` → ad + en yüksek skor.
+  Kullanıcı silme talebi gelirse Firebase konsolundan Authentication'daki hesabı ve
+  bu iki dokümanı silmen yeterli.
 
 ---
 

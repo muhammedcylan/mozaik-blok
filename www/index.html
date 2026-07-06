@@ -32,6 +32,7 @@
     user-select:none;
     -webkit-user-select:none;
   }
+  input{ user-select:text; -webkit-user-select:text; }
   .app{
     max-width: 480px;
     margin: 0 auto;
@@ -117,7 +118,6 @@
     cursor:pointer;
   }
   .ctrl-btn:active{ transform: scale(0.96); }
-  .ctrl-btn:disabled{ opacity:0.35; pointer-events:none; }
   .board-wrap{
     width:100%;
     display:flex;
@@ -254,41 +254,47 @@
     z-index: 1000;
     backdrop-filter: blur(3px);
     overflow:hidden;
+    padding: 16px;
   }
   .overlay.hidden{ display:none; }
   .overlay-card{
     background: linear-gradient(180deg, var(--panel), var(--bg2));
     border: 1px solid rgba(212,175,55,0.4);
     border-radius: 18px;
-    padding: 32px 36px;
+    padding: 26px 24px;
     text-align:center;
     box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     position: relative;
     z-index: 2;
+    width: 100%;
+    max-width: 360px;
+    max-height: calc(100vh - 32px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+    overflow-y: auto;
   }
   .overlay-card h2{
     font-family:'Cinzel', serif;
     color: var(--coral);
     letter-spacing:2px;
     margin: 0 0 10px;
+    font-size: 22px;
   }
   .overlay-card h2.title-gold{ color: var(--gold); }
-  .overlay-card p{ margin: 0 0 20px; color: var(--cream); font-size:15px; }
+  .overlay-card p{ margin: 0 0 18px; color: var(--cream); font-size:15px; }
   .overlay-card span{ color: var(--gold); font-weight:700; }
   #newRecordMsg{
-    margin: -8px 0 16px;
+    margin: -6px 0 14px;
     font-weight:800;
     font-size:17px;
     letter-spacing:2px;
     color: var(--gold);
     animation: bump 0.6s ease infinite alternate;
   }
-  #newRecordMsg.hidden{ display:none; }
+  .hidden-el{ display:none !important; }
   .btn{
     border: none;
     font-weight:700;
     letter-spacing:1px;
-    padding: 12px 28px;
+    padding: 12px 24px;
     border-radius: 999px;
     font-size:14px;
     cursor:pointer;
@@ -305,7 +311,7 @@
     border: 1px solid rgba(237,228,207,0.35);
     color: var(--cream);
   }
-  .btn-row{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn-row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
   .btn-row .btn{ margin:0; }
   .stat-rows{ margin: 0 0 22px; min-width: 210px; }
   .stat-row{
@@ -331,6 +337,99 @@
     0%{ transform: translateY(0) rotate(0deg); opacity:1; }
     100%{ transform: translateY(110vh) rotate(720deg); opacity:0.7; }
   }
+  /* onay ekranı */
+  .policy-box{
+    text-align:left;
+    font-size: 12px;
+    line-height: 1.55;
+    color: rgba(237,228,207,0.85);
+    background: rgba(6,14,28,0.45);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    max-height: 34vh;
+    overflow-y: auto;
+    margin: 0 0 18px;
+  }
+  .policy-box h3{
+    font-size: 12px;
+    letter-spacing:1px;
+    color: var(--turquoise);
+    margin: 10px 0 4px;
+    text-transform: uppercase;
+  }
+  .policy-box h3:first-child{ margin-top:0; }
+  .policy-box p{ margin: 0 0 8px; font-size:12px; color: inherit; }
+  /* liderlik */
+  .lb-sub{ font-size: 13px !important; color: rgba(237,228,207,0.8) !important; }
+  .lb-wide{ width:100%; margin-bottom:10px; }
+  .lb-divider{
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: rgba(237,228,207,0.5);
+    text-transform: uppercase;
+    margin: 10px 0;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .lb-divider::before, .lb-divider::after{
+    content:'';
+    flex:1;
+    height:1px;
+    background: var(--line);
+  }
+  .input{
+    width: 100%;
+    background: rgba(6,14,28,0.5);
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 10px;
+    color: var(--cream);
+    font-family:'Inter', sans-serif;
+    font-size: 14px;
+    padding: 11px 14px;
+    margin-bottom: 10px;
+    outline: none;
+  }
+  .input:focus{ border-color: var(--turquoise); }
+  .input::placeholder{ color: rgba(237,228,207,0.4); }
+  .lb-rows{ text-align:left; margin: 0 0 4px; }
+  .lb-row{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    padding: 7px 8px;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+  }
+  .lb-row:last-child{ border-bottom:none; }
+  .lb-row .rank{
+    width: 26px;
+    text-align:center;
+    font-weight:800;
+    color: var(--turquoise);
+    flex-shrink:0;
+  }
+  .lb-row:nth-child(1) .rank{ color: var(--gold); }
+  .lb-row:nth-child(2) .rank{ color: #c0c0c0; }
+  .lb-row:nth-child(3) .rank{ color: #cd7f32; }
+  .lb-row .name{
+    flex:1;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .lb-row .pts{ font-weight:700; color: var(--gold); font-variant-numeric: tabular-nums; }
+  .lb-row.me{
+    background: rgba(31,169,166,0.15);
+    border-radius: 8px;
+    border-bottom-color: transparent;
+  }
+  .lb-error{
+    font-size: 12px !important;
+    color: #e08a80 !important;
+    margin: 8px 0 0 !important;
+  }
   footer.hint{
     margin-top:16px;
     font-size:11px;
@@ -349,7 +448,7 @@
       <div class="score-box"><span class="label">REKOR</span><span id="best">0</span></div>
     </div>
     <div class="controls">
-      <button id="undoBtn" class="ctrl-btn" disabled>↩ Geri Al</button>
+      <button id="lbBtn" class="ctrl-btn">🏆 Liderlik</button>
       <button id="soundBtn" class="ctrl-btn">🔊 Ses</button>
       <button id="statsBtn" class="ctrl-btn">📊 İstatistik</button>
     </div>
@@ -369,7 +468,7 @@
 <div id="gameover" class="overlay hidden">
   <div class="overlay-card">
     <h2>OYUN BİTTİ</h2>
-    <p id="newRecordMsg" class="hidden">🏆 YENİ REKOR!</p>
+    <p id="newRecordMsg" class="hidden-el">🏆 YENİ REKOR!</p>
     <p>Skorun: <span id="finalScore">0</span></p>
     <div class="btn-row">
       <button id="rescueBtn" class="btn btn-secondary">🛟 Kurtar (1 hak)</button>
@@ -402,6 +501,76 @@
   </div>
 </div>
 
+<div id="consentOverlay" class="overlay hidden">
+  <div class="overlay-card">
+    <h2 class="title-gold">HOŞ GELDİN</h2>
+    <p class="lb-sub">Oynamaya başlamadan önce lütfen aşağıdaki metni oku ve kabul et.</p>
+    <div class="policy-box">
+      <h3>Gizlilik Politikası</h3>
+      <p>Mozaik Blok, oyunu oynamak için hiçbir kişisel veri toplamaz. Skorların,
+      istatistiklerin ve ayarların yalnızca cihazında saklanır.</p>
+      <p>İsteğe bağlı <b>Liderlik Tablosu</b> özelliğini kullanırsan: giriş yöntemine
+      bağlı olarak e-posta adresin veya Google/Apple hesap kimliğin, seçtiğin takma ad
+      ve en yüksek skorun, Google Firebase altyapısında güvenli şekilde saklanır.
+      Takma adın ve skorun diğer oyunculara gösterilir; e-posta adresin hiçbir zaman
+      gösterilmez ve üçüncü taraflarla paylaşılmaz.</p>
+      <p>Uygulama reklam içermez ve analitik/izleme aracı kullanmaz. Liderlik
+      hesabını ve verilerini sildirmek için bize e-posta ile ulaşabilirsin.</p>
+      <h3>Kullanım Koşulları</h3>
+      <p>Oyun kişisel kullanım içindir. Liderlik tablosunda uygunsuz takma ad
+      kullanmak ve hile/otomasyon ile skor göndermek yasaktır; bu tür hesaplar ve
+      skorlar silinebilir.</p>
+      <p>Devam ederek gizlilik politikasını ve kullanım koşullarını kabul etmiş
+      olursun. Son güncelleme: 6 Temmuz 2026</p>
+    </div>
+    <div class="btn-row">
+      <button id="consentNoBtn" class="btn btn-secondary">Reddet ve Çık</button>
+      <button id="consentYesBtn" class="btn btn-primary">Kabul Ediyorum</button>
+    </div>
+  </div>
+</div>
+
+<div id="lbOverlay" class="overlay hidden">
+  <div class="overlay-card">
+    <h2 class="title-gold">LİDERLİK</h2>
+
+    <div id="lbUnavailable" class="hidden-el">
+      <p class="lb-sub">Çevrimiçi liderlik tablosu henüz etkin değil
+      (Firebase yapılandırması gerekiyor — kurulum adımları README'de).</p>
+      <p>Cihazındaki rekor: <span id="lbLocalBest">0</span></p>
+    </div>
+
+    <div id="lbSignin" class="hidden-el">
+      <p class="lb-sub">Skorunu dünya sıralamasına göndermek için giriş yap:</p>
+      <button id="lbGoogleBtn" class="btn btn-primary lb-wide">Google ile Giriş</button>
+      <button id="lbAppleBtn" class="btn btn-secondary lb-wide hidden-el"> Apple ile Giriş</button>
+      <div class="lb-divider">veya e-posta ile</div>
+      <input id="lbEmail" class="input" type="email" placeholder="E-posta" autocomplete="email">
+      <input id="lbPass" class="input" type="password" placeholder="Şifre (en az 6 karakter)">
+      <div class="btn-row">
+        <button id="lbEmailInBtn" class="btn btn-primary">Giriş Yap</button>
+        <button id="lbEmailUpBtn" class="btn btn-secondary">Kayıt Ol</button>
+      </div>
+    </div>
+
+    <div id="lbNickname" class="hidden-el">
+      <p class="lb-sub">Liderlik tablosunda görünecek takma adını seç (3-16 karakter):</p>
+      <input id="lbNick" class="input" maxlength="16" placeholder="Takma ad">
+      <button id="lbNickBtn" class="btn btn-primary lb-wide">Kaydet ve Devam</button>
+    </div>
+
+    <div id="lbList" class="hidden-el">
+      <div id="lbRows" class="lb-rows"><p class="lb-sub">Yükleniyor…</p></div>
+      <div class="btn-row" style="margin-top:12px">
+        <button id="lbSignOutBtn" class="btn btn-secondary">Hesaptan Çık</button>
+      </div>
+    </div>
+
+    <p id="lbError" class="lb-error hidden-el"></p>
+    <button id="lbCloseBtn" class="btn btn-primary" style="margin-top:16px">Kapat</button>
+  </div>
+</div>
+
 <script>
 (function(){
   const SIZE = 8;
@@ -409,6 +578,8 @@
   const BEST_KEY = 'bestScore';
   const SOUND_KEY = 'soundOn';
   const STATS_KEY = 'stats';
+  const CONSENT_KEY = 'consentAccepted';
+  const SUBMITTED_KEY = 'submittedScore';
 
   const SHAPES = [
     [[0,0]],
@@ -444,6 +615,9 @@
   const AppPlugin = Cap && Cap.Plugins ? Cap.Plugins.App : null;
   const Splash = Cap && Cap.Plugins ? Cap.Plugins.SplashScreen : null;
   const HapticsPlugin = Cap && Cap.Plugins ? Cap.Plugins.Haptics : null;
+  const FirebaseAuth = Cap && Cap.Plugins ? Cap.Plugins.FirebaseAuthentication : null;
+  const Firestore = Cap && Cap.Plugins ? Cap.Plugins.FirebaseFirestore : null;
+  const platform = Cap && Cap.getPlatform ? Cap.getPlatform() : 'web';
 
   let grid = Array.from({length:SIZE}, ()=>Array(SIZE).fill(null));
   let pieces = [];
@@ -458,9 +632,8 @@
   let recordAtStart = 0;       // oyun başındaki rekor; kutlama buna göre
   let recordCelebrated = false;
   let gameCounted = false;     // ilk hamlede oyun sayacı artar
-  let undoState = null;        // tek adımlık geri alma anlık görüntüsü
-  let pendingClears = [];      // temizleme animasyonu zamanlayıcıları (undo iptali için)
-  let newSetTimer = null;      // yeni parça seti zamanlayıcısı (undo iptali için)
+  let pendingClears = [];      // temizleme animasyonu zamanlayıcıları
+  let newSetTimer = null;
   let stats = { games:0, lines:0, bestCombo:0 };
 
   const gridEl = document.getElementById('grid');
@@ -472,9 +645,10 @@
   const finalScoreEl = document.getElementById('finalScore');
   const exitOverlayEl = document.getElementById('exitConfirm');
   const statsOverlayEl = document.getElementById('statsOverlay');
+  const consentOverlayEl = document.getElementById('consentOverlay');
+  const lbOverlayEl = document.getElementById('lbOverlay');
   const newRecordMsgEl = document.getElementById('newRecordMsg');
   const rescueBtn = document.getElementById('rescueBtn');
-  const undoBtn = document.getElementById('undoBtn');
   const soundBtn = document.getElementById('soundBtn');
 
   /* ---------- kalıcı depolama ---------- */
@@ -787,16 +961,7 @@
     }
   }
 
-  /* ---------- geri alma ---------- */
-
-  function snapshotForUndo(){
-    undoState = {
-      grid: grid.map(row=>row.slice()),
-      pieces: pieces.map(p=>({ shape:p.shape, color:p.color, used:p.used })),
-      score, streak
-    };
-    undoBtn.disabled = false;
-  }
+  /* ---------- yerleştirme ve temizleme ---------- */
 
   function cancelPendingClears(){
     pendingClears.forEach(pc=>{
@@ -809,31 +974,11 @@
     pendingClears = [];
   }
 
-  function undo(){
-    if(!undoState) return;
-    cancelPendingClears();
-    if(newSetTimer){ clearTimeout(newSetTimer); newSetTimer = null; }
-    grid = undoState.grid.map(row=>row.slice());
-    pieces = undoState.pieces.map(p=>({ shape:p.shape, color:p.color, used:p.used }));
-    score = undoState.score;
-    streak = undoState.streak;
-    undoState = null;
-    undoBtn.disabled = true;
-    scoreEl.textContent = score;
-    renderGrid();
-    renderTray();
-    sndTick();
-    haptic('LIGHT');
-  }
-
-  /* ---------- yerleştirme ve temizleme ---------- */
-
   function endDrag(){
     if(!dragging) return;
     const { idx, shape, lastRow, lastCol, sourceEl } = dragging;
     const valid = canPlace(shape, lastRow, lastCol);
     if(valid){
-      snapshotForUndo();
       if(!gameCounted){
         gameCounted = true;
         stats.games++;
@@ -951,11 +1096,9 @@
 
   function showGameOver(){
     finalScoreEl.textContent = score;
-    undoState = null;
-    undoBtn.disabled = true;
     rescueBtn.style.display = rescueUsed ? 'none' : '';
     const isNewRecord = score > recordAtStart && score > 0;
-    newRecordMsgEl.classList.toggle('hidden', !isNewRecord);
+    newRecordMsgEl.classList.toggle('hidden-el', !isNewRecord);
     overlayEl.classList.remove('hidden');
     if(isNewRecord){
       spawnConfetti();
@@ -964,6 +1107,7 @@
     } else {
       sndGameOver();
     }
+    submitScoreIfBetter(); // girişliyse rekoru liderlik tablosuna gönder
   }
 
   function rescue(){
@@ -975,8 +1119,6 @@
       color: PALETTE[Math.floor(Math.random()*PALETTE.length)],
       used: false
     }));
-    undoState = null;
-    undoBtn.disabled = true;
     sndTick();
     renderTray();
     checkGameOver(); // tahta tamamen doluysa tekrar oyun sonu (kurtarma artık yok)
@@ -992,8 +1134,6 @@
     gameCounted = false;
     recordCelebrated = false;
     recordAtStart = best;
-    undoState = null;
-    undoBtn.disabled = true;
     scoreEl.textContent = 0;
     overlayEl.classList.add('hidden');
     clearConfetti();
@@ -1012,19 +1152,233 @@
     sndTick();
   }
 
+  /* ---------- liderlik tablosu (Firebase) ---------- */
+
+  let currentUser = null;   // { uid, email, ... }
+  let myName = null;        // liderlikte görünen takma ad
+  let lbBusy = false;
+
+  const lbSections = {
+    unavailable: document.getElementById('lbUnavailable'),
+    signin: document.getElementById('lbSignin'),
+    nickname: document.getElementById('lbNickname'),
+    list: document.getElementById('lbList')
+  };
+  const lbErrorEl = document.getElementById('lbError');
+  const lbRowsEl = document.getElementById('lbRows');
+
+  function fbReady(){ return !!(FirebaseAuth && Firestore); }
+
+  function showLbSection(name){
+    Object.keys(lbSections).forEach(k=>{
+      lbSections[k].classList.toggle('hidden-el', k!==name);
+    });
+    lbError('');
+  }
+
+  function lbError(msg){
+    lbErrorEl.textContent = msg || '';
+    lbErrorEl.classList.toggle('hidden-el', !msg);
+  }
+
+  // Firebase hata kodlarını kullanıcı diline çevir
+  function friendlyAuthError(e){
+    const s = String(e && (e.message || e.code) || e || '');
+    if(/invalid-email/i.test(s)) return 'Geçersiz e-posta adresi.';
+    if(/email-already-in-use/i.test(s)) return 'Bu e-posta zaten kayıtlı. "Giriş Yap"ı dene.';
+    if(/weak-password/i.test(s)) return 'Şifre çok zayıf (en az 6 karakter olmalı).';
+    if(/wrong-password|invalid-credential|invalid-login/i.test(s)) return 'E-posta veya şifre hatalı.';
+    if(/user-not-found/i.test(s)) return 'Bu e-posta ile kayıt bulunamadı. "Kayıt Ol"u dene.';
+    if(/too-many-requests/i.test(s)) return 'Çok fazla deneme yapıldı, biraz bekleyip tekrar dene.';
+    if(/network/i.test(s)) return 'Ağ hatası — internet bağlantını kontrol et.';
+    if(/canceled|cancelled|closed/i.test(s)) return ''; // kullanıcı vazgeçti, hata gösterme
+    return 'Bir hata oluştu: ' + s.slice(0, 120);
+  }
+
+  async function lbOpen(){
+    sndTick();
+    lbOverlayEl.classList.remove('hidden');
+    if(!fbReady()){
+      document.getElementById('lbLocalBest').textContent = best;
+      showLbSection('unavailable');
+      return;
+    }
+    document.getElementById('lbAppleBtn').classList.toggle('hidden-el', platform !== 'ios');
+    try{
+      const res = await FirebaseAuth.getCurrentUser();
+      currentUser = res && res.user ? res.user : null;
+    }catch(e){ currentUser = null; }
+    if(!currentUser){
+      showLbSection('signin');
+    } else {
+      await afterSignIn();
+    }
+  }
+
+  async function signInWith(fn){
+    if(lbBusy) return;
+    lbBusy = true;
+    lbError('');
+    try{
+      const res = await fn();
+      currentUser = res && res.user ? res.user : null;
+      if(!currentUser) throw new Error('Giriş tamamlanamadı.');
+      await afterSignIn();
+    }catch(e){
+      const msg = friendlyAuthError(e);
+      if(msg) lbError(msg);
+    }finally{
+      lbBusy = false;
+    }
+  }
+
+  async function afterSignIn(){
+    // Takma ad kayıtlı mı?
+    myName = null;
+    try{
+      const doc = await Firestore.getDocument({ reference: 'users/' + currentUser.uid });
+      if(doc && doc.snapshot && doc.snapshot.data && doc.snapshot.data.name){
+        myName = doc.snapshot.data.name;
+      }
+    }catch(e){}
+    if(!myName){
+      showLbSection('nickname');
+      return;
+    }
+    await refreshBoard();
+  }
+
+  async function saveNickname(){
+    const name = document.getElementById('lbNick').value.trim();
+    if(name.length < 3 || name.length > 16){
+      lbError('Takma ad 3-16 karakter olmalı.');
+      return;
+    }
+    try{
+      await Firestore.setDocument({
+        reference: 'users/' + currentUser.uid,
+        data: { name },
+        merge: true
+      });
+      myName = name;
+      storeSet(SUBMITTED_KEY, '0'); // yeni adla skoru yeniden gönder
+      await refreshBoard();
+    }catch(e){
+      lbError(friendlyAuthError(e));
+    }
+  }
+
+  async function submitScoreIfBetter(){
+    if(!fbReady() || !currentUser || !myName || best <= 0) return;
+    const submitted = parseInt(await storeGet(SUBMITTED_KEY), 10) || 0;
+    if(best <= submitted) return;
+    try{
+      await Firestore.setDocument({
+        reference: 'leaderboard/' + currentUser.uid,
+        data: { name: myName, score: best, updatedAt: Date.now() },
+        merge: true
+      });
+      storeSet(SUBMITTED_KEY, best);
+    }catch(e){ /* çevrimdışı olabilir; bir dahaki sefere */ }
+  }
+
+  async function refreshBoard(){
+    showLbSection('list');
+    lbRowsEl.innerHTML = '<p class="lb-sub">Yükleniyor…</p>';
+    await submitScoreIfBetter();
+    try{
+      const res = await Firestore.getCollection({
+        reference: 'leaderboard',
+        queryConstraints: [
+          { type: 'orderBy', fieldPath: 'score', directionStr: 'desc' },
+          { type: 'limit', limit: 20 }
+        ]
+      });
+      const rows = (res && res.snapshots) || [];
+      if(!rows.length){
+        lbRowsEl.innerHTML = '<p class="lb-sub">Henüz skor yok — ilk sen ol!</p>';
+        return;
+      }
+      lbRowsEl.innerHTML = '';
+      rows.forEach((snap, i)=>{
+        const d = snap.data || {};
+        const row = document.createElement('div');
+        row.className = 'lb-row' + (snap.id === currentUser.uid ? ' me' : '');
+        const nameSafe = String(d.name || '???').slice(0, 16);
+        row.innerHTML = '<span class="rank">' + (i+1) + '</span>' +
+                        '<span class="name"></span>' +
+                        '<span class="pts">' + (parseInt(d.score,10)||0) + '</span>';
+        row.querySelector('.name').textContent = nameSafe + (snap.id === currentUser.uid ? ' (sen)' : '');
+        lbRowsEl.appendChild(row);
+      });
+    }catch(e){
+      lbRowsEl.innerHTML = '';
+      lbError('Liste yüklenemedi — internet bağlantını kontrol et.');
+    }
+  }
+
+  async function lbSignOut(){
+    try{ await FirebaseAuth.signOut(); }catch(e){}
+    currentUser = null;
+    myName = null;
+    storeSet(SUBMITTED_KEY, '0');
+    showLbSection('signin');
+    sndTick();
+  }
+
+  // Uygulama açılışında sessizce oturum ve takma adı yükle
+  // (oyun sonunda skor gönderebilmek için)
+  async function initOnlineQuiet(){
+    if(!fbReady()) return;
+    try{
+      const res = await FirebaseAuth.getCurrentUser();
+      currentUser = res && res.user ? res.user : null;
+      if(currentUser){
+        const doc = await Firestore.getDocument({ reference: 'users/' + currentUser.uid });
+        if(doc && doc.snapshot && doc.snapshot.data && doc.snapshot.data.name){
+          myName = doc.snapshot.data.name;
+        }
+      }
+    }catch(e){}
+  }
+
+  /* ---------- ilk açılış onayı ---------- */
+
+  async function checkConsent(){
+    const ok = await storeGet(CONSENT_KEY);
+    if(ok !== '1'){
+      consentOverlayEl.classList.remove('hidden');
+    }
+  }
+
+  document.getElementById('consentYesBtn').addEventListener('click', ()=>{
+    storeSet(CONSENT_KEY, '1');
+    consentOverlayEl.classList.add('hidden');
+    sndTick();
+  });
+  document.getElementById('consentNoBtn').addEventListener('click', ()=>{
+    if(AppPlugin) AppPlugin.exitApp();
+    // tarayıcıda çıkılamaz; onay ekranı açık kalır
+  });
+
   /* ---------- geri tuşu ve olaylar ---------- */
 
   // Android donanım geri tuşu:
+  // - Onay ekranı açıksa: uygulamadan çık (kabul edilmeden oynanamaz)
   // - Çıkış onayı açıksa: onayı kapat (vazgeç)
-  // - İstatistik açıksa: kapat
+  // - İstatistik/Liderlik açıksa: kapat
   // - Oyun bitti ekranındaysa ("menü" durumu): uygulamadan çık
   // - Oyun içindeyse: çıkış onayı göster
   if(AppPlugin){
     AppPlugin.addListener('backButton', ()=>{
-      if(!exitOverlayEl.classList.contains('hidden')){
+      if(!consentOverlayEl.classList.contains('hidden')){
+        AppPlugin.exitApp();
+      } else if(!exitOverlayEl.classList.contains('hidden')){
         exitOverlayEl.classList.add('hidden');
       } else if(!statsOverlayEl.classList.contains('hidden')){
         statsOverlayEl.classList.add('hidden');
+      } else if(!lbOverlayEl.classList.contains('hidden')){
+        lbOverlayEl.classList.add('hidden');
       } else if(!overlayEl.classList.contains('hidden')){
         AppPlugin.exitApp();
       } else {
@@ -1048,13 +1402,39 @@
   });
   document.getElementById('statsBtn').addEventListener('click', openStats);
   rescueBtn.addEventListener('click', rescue);
-  undoBtn.addEventListener('click', undo);
   soundBtn.addEventListener('click', ()=>{
     soundOn = !soundOn;
     storeSet(SOUND_KEY, soundOn ? '1' : '0');
     updateSoundBtn();
     if(soundOn){ ensureAudio(); sndTick(); }
   });
+
+  // liderlik olayları
+  document.getElementById('lbBtn').addEventListener('click', lbOpen);
+  document.getElementById('lbCloseBtn').addEventListener('click', ()=>{
+    lbOverlayEl.classList.add('hidden');
+    sndTick();
+  });
+  document.getElementById('lbGoogleBtn').addEventListener('click', ()=>{
+    signInWith(()=> FirebaseAuth.signInWithGoogle());
+  });
+  document.getElementById('lbAppleBtn').addEventListener('click', ()=>{
+    signInWith(()=> FirebaseAuth.signInWithApple());
+  });
+  document.getElementById('lbEmailInBtn').addEventListener('click', ()=>{
+    const email = document.getElementById('lbEmail').value.trim();
+    const password = document.getElementById('lbPass').value;
+    if(!email || !password){ lbError('E-posta ve şifre gerekli.'); return; }
+    signInWith(()=> FirebaseAuth.signInWithEmailAndPassword({ email, password }));
+  });
+  document.getElementById('lbEmailUpBtn').addEventListener('click', ()=>{
+    const email = document.getElementById('lbEmail').value.trim();
+    const password = document.getElementById('lbPass').value;
+    if(!email || !password){ lbError('E-posta ve şifre gerekli.'); return; }
+    signInWith(()=> FirebaseAuth.createUserWithEmailAndPassword({ email, password }));
+  });
+  document.getElementById('lbNickBtn').addEventListener('click', saveNickname);
+  document.getElementById('lbSignOutBtn').addEventListener('click', lbSignOut);
 
   window.addEventListener('pointerdown', ensureAudio);
   window.addEventListener('pointermove', (e)=> moveGhost(e.clientX, e.clientY));
@@ -1066,11 +1446,13 @@
 
   buildGridDom();
   renderGrid();
-  loadPersisted().then(()=>{
+  loadPersisted().then(async ()=>{
     recordAtStart = best;
     updateGridRect();
     newPieceSet();
+    await checkConsent();
     if(Splash) Splash.hide();
+    initOnlineQuiet();
   });
 })();
 </script>
