@@ -16,6 +16,7 @@
   ],
   "license": "UNLICENSED",
   "dependencies": {
+    "@capacitor-community/in-app-review": "^8.0.0",
     "@capacitor-firebase/authentication": "^8.3.0",
     "@capacitor-firebase/firestore": "^8.3.0",
     "@capacitor/android": "^8.4.1",

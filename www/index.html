@@ -1065,6 +1065,7 @@
       const SUBMITTED_KEY = 'submittedScore';
       const DAILY_KEY = 'daily';
       const TUTORIAL_KEY = 'tutorialDone';
+      const REVIEW_KEY = 'reviewAsked';
 
       const SHAPES = [
         [[0, 0]],
@@ -1647,6 +1648,7 @@
       const HapticsPlugin = Cap && Cap.Plugins ? Cap.Plugins.Haptics : null;
       const FirebaseAuth = Cap && Cap.Plugins ? Cap.Plugins.FirebaseAuthentication : null;
       const Firestore = Cap && Cap.Plugins ? Cap.Plugins.FirebaseFirestore : null;
+      const ReviewPlugin = Cap && Cap.Plugins ? Cap.Plugins.InAppReview : null;
       const platform = Cap && Cap.getPlatform ? Cap.getPlatform() : 'web';
 
       let grid = Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
@@ -2200,6 +2202,22 @@
         // girişliyse rekoru ilgili liderlik tablosuna gönder
         if (mode === 'daily') submitDailyIfBetter();
         else submitScoreIfBetter();
+        pushCloudProfile();  // rekor + istatistik bulut yedeği
+        maybeAskReview();    // 3. oyundan sonra bir kez mağaza puanı iste
+      }
+
+      // Native mağaza değerlendirme kutusu: en az 3 oyun bitiren oyuncuya,
+      // yalnızca bir kez sorulur (gösterip göstermemek OS'nin kararıdır).
+      async function maybeAskReview() {
+        if (!ReviewPlugin) return;
+        try {
+          if (stats.games < 3) return;
+          if ((await storeGet(REVIEW_KEY)) === '1') return;
+          storeSet(REVIEW_KEY, '1');
+          setTimeout(() => {
+            try { ReviewPlugin.requestReview(); } catch (e) { }
+          }, 1200);
+        } catch (e) { }
       }
 
       function rescue() {
@@ -2372,15 +2390,53 @@
         }
       }
 
-      async function afterSignIn() {
-        // Takma ad kayıtlı mı?
-        myName = null;
+      // Bulut profili (users/{uid}): takma ad + rekor + istatistik yedeği.
+      // Girişte cihaz ile bulut birleştirilir: her alanda büyük olan kazanır,
+      // böylece telefon değiştiren oyuncu rekorunu kaybetmez.
+      async function syncCloudProfile() {
+        if (!fbReady() || !currentUser) return;
         try {
           const doc = await Firestore.getDocument({ reference: 'users/' + currentUser.uid });
-          if (doc && doc.snapshot && doc.snapshot.data && doc.snapshot.data.name) {
-            myName = doc.snapshot.data.name;
+          const d = (doc && doc.snapshot && doc.snapshot.data) || {};
+          if (d.name) myName = d.name;
+          const cloudBest = parseInt(d.best, 10) || 0;
+          const cs = d.stats || {};
+          const cloudAhead = cloudBest > best || (cs.games | 0) > stats.games ||
+            (cs.lines | 0) > stats.lines || (cs.bestCombo | 0) > stats.bestCombo;
+          const localAhead = best > cloudBest || stats.games > (cs.games | 0) ||
+            stats.lines > (cs.lines | 0) || stats.bestCombo > (cs.bestCombo | 0);
+          if (cloudAhead) {
+            if (cloudBest > best) {
+              best = cloudBest;
+              storeSet(BEST_KEY, best);
+              if (mode !== 'daily') {
+                bestEl.textContent = best;
+                recordAtStart = Math.max(recordAtStart, best);
+              }
+            }
+            stats.games = Math.max(stats.games, cs.games | 0);
+            stats.lines = Math.max(stats.lines, cs.lines | 0);
+            stats.bestCombo = Math.max(stats.bestCombo, cs.bestCombo | 0);
+            saveStats();
           }
+          if (localAhead) pushCloudProfile();
         } catch (e) { }
+      }
+
+      function pushCloudProfile() {
+        if (!fbReady() || !currentUser) return;
+        try {
+          Firestore.setDocument({
+            reference: 'users/' + currentUser.uid,
+            data: { best, stats },
+            merge: true
+          });
+        } catch (e) { }
+      }
+
+      async function afterSignIn() {
+        myName = null;
+        await syncCloudProfile(); // takma adı da yükler
         if (!myName) {
           showLbSection('nickname');
           return;
@@ -2508,12 +2564,7 @@
         try {
           const res = await FirebaseAuth.getCurrentUser();
           currentUser = res && res.user ? res.user : null;
-          if (currentUser) {
-            const doc = await Firestore.getDocument({ reference: 'users/' + currentUser.uid });
-            if (doc && doc.snapshot && doc.snapshot.data && doc.snapshot.data.name) {
-              myName = doc.snapshot.data.name;
-            }
-          }
+          if (currentUser) await syncCloudProfile(); // ad + rekor/istatistik birleştirme
         } catch (e) { }
       }
 
