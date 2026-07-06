@@ -144,8 +144,17 @@
     .controls {
       display: flex;
       justify-content: center;
+      flex-wrap: wrap;
       gap: 8px;
       margin-top: 12px;
+    }
+
+    .daily-banner {
+      margin-top: 10px;
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: var(--gold);
+      text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
     }
 
     .ctrl-btn {
@@ -664,6 +673,31 @@
       margin: 8px 0 0 !important;
     }
 
+    .lb-tabs {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .lb-tab {
+      background: transparent;
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 999px;
+      color: rgba(237, 228, 207, 0.6);
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 16px;
+      cursor: pointer;
+    }
+
+    .lb-tab.active {
+      background: linear-gradient(180deg, var(--turquoise), #167f7d);
+      border-color: transparent;
+      color: #08221f;
+    }
+
     footer.hint {
       margin-top: 16px;
       font-size: 11px;
@@ -683,9 +717,14 @@
         <div class="score-box"><span class="label" data-i18n="best">REKOR</span><span id="best">0</span></div>
       </div>
       <div class="controls">
+        <button id="modeBtn" class="ctrl-btn" data-i18n="dailyBtn">📅 Günlük</button>
         <button id="lbBtn" class="ctrl-btn" data-i18n="lbBtn">🏆 Liderlik</button>
         <button id="soundBtn" class="ctrl-btn">🔊 Ses</button>
         <button id="statsBtn" class="ctrl-btn" data-i18n="statsBtn">📊 İstatistik</button>
+      </div>
+      <div id="dailyBanner" class="daily-banner hidden-el">
+        <span data-i18n="dailyBanner">Günlük Bulmaca — herkese aynı parçalar!</span>
+        <span id="dailyDateLabel"></span>
       </div>
     </header>
 
@@ -778,6 +817,10 @@
       </div>
 
       <div id="lbList" class="hidden-el">
+        <div class="lb-tabs">
+          <button id="lbTabAll" class="lb-tab active" data-i18n="tabAll">Genel</button>
+          <button id="lbTabDaily" class="lb-tab" data-i18n="tabToday">Bugün</button>
+        </div>
         <div id="lbRows" class="lb-rows">
           <p class="lb-sub" data-i18n="loading">Yükleniyor…</p>
         </div>
@@ -800,6 +843,7 @@
       const STATS_KEY = 'stats';
       const CONSENT_KEY = 'consentAccepted';
       const SUBMITTED_KEY = 'submittedScore';
+      const DAILY_KEY = 'daily';
 
       const SHAPES = [
         [[0, 0]],
@@ -835,6 +879,8 @@
       const I18N = {
         en: {
           subtitle: 'block puzzle', score: 'SCORE', best: 'BEST',
+          dailyBtn: '📅 Daily', classicBtn: '♾️ Classic', dailyBestLabel: 'TODAY',
+          dailyBanner: 'Daily Puzzle — same pieces for everyone!', tabAll: 'All-Time', tabToday: 'Today',
           lbBtn: '🏆 Ranking', sound: 'Sound', statsBtn: '📊 Stats',
           hint: 'drag a piece onto the board · fill a row or column to clear it',
           gameOver: 'GAME OVER', newRecord: '🏆 NEW RECORD!', yourScore: 'Your score:',
@@ -871,6 +917,8 @@
         },
         tr: {
           subtitle: 'blok bulmaca', score: 'SKOR', best: 'REKOR',
+          dailyBtn: '📅 Günlük', classicBtn: '♾️ Klasik', dailyBestLabel: 'BUGÜN',
+          dailyBanner: 'Günlük Bulmaca — herkese aynı parçalar!', tabAll: 'Genel', tabToday: 'Bugün',
           lbBtn: '🏆 Liderlik', sound: 'Ses', statsBtn: '📊 İstatistik',
           hint: 'parçayı sürükleyip ızgaraya bırak · satır veya sütunu doldur, temizle',
           gameOver: 'OYUN BİTTİ', newRecord: '🏆 YENİ REKOR!', yourScore: 'Skorun:',
@@ -907,6 +955,8 @@
         },
         de: {
           subtitle: 'Blockpuzzle', score: 'PUNKTE', best: 'REKORD',
+          dailyBtn: '📅 Täglich', classicBtn: '♾️ Klassisch', dailyBestLabel: 'HEUTE',
+          dailyBanner: 'Tagesrätsel — gleiche Teile für alle!', tabAll: 'Gesamt', tabToday: 'Heute',
           lbBtn: '🏆 Rangliste', sound: 'Ton', statsBtn: '📊 Statistik',
           hint: 'Ziehe ein Teil aufs Brett · fülle eine Reihe oder Spalte, um sie zu löschen',
           gameOver: 'SPIEL VORBEI', newRecord: '🏆 NEUER REKORD!', yourScore: 'Dein Ergebnis:',
@@ -943,6 +993,8 @@
         },
         fr: {
           subtitle: 'puzzle de blocs', score: 'SCORE', best: 'RECORD',
+          dailyBtn: '📅 Du jour', classicBtn: '♾️ Classique', dailyBestLabel: 'AUJOURD\'HUI',
+          dailyBanner: 'Défi du jour — mêmes pièces pour tous !', tabAll: 'Général', tabToday: 'Aujourd\'hui',
           lbBtn: '🏆 Classement', sound: 'Son', statsBtn: '📊 Stats',
           hint: 'fais glisser une pièce sur la grille · remplis une ligne ou une colonne pour la vider',
           gameOver: 'PARTIE TERMINÉE', newRecord: '🏆 NOUVEAU RECORD !', yourScore: 'Ton score :',
@@ -979,6 +1031,8 @@
         },
         es: {
           subtitle: 'puzle de bloques', score: 'PUNTOS', best: 'RÉCORD',
+          dailyBtn: '📅 Diario', classicBtn: '♾️ Clásico', dailyBestLabel: 'HOY',
+          dailyBanner: 'Reto diario — ¡las mismas piezas para todos!', tabAll: 'General', tabToday: 'Hoy',
           lbBtn: '🏆 Clasificación', sound: 'Sonido', statsBtn: '📊 Estadísticas',
           hint: 'arrastra una pieza al tablero · llena una fila o columna para limpiarla',
           gameOver: 'FIN DEL JUEGO', newRecord: '🏆 ¡NUEVO RÉCORD!', yourScore: 'Tu puntuación:',
@@ -1015,6 +1069,8 @@
         },
         it: {
           subtitle: 'puzzle di blocchi', score: 'PUNTI', best: 'RECORD',
+          dailyBtn: '📅 Del giorno', classicBtn: '♾️ Classico', dailyBestLabel: 'OGGI',
+          dailyBanner: 'Sfida del giorno — stessi pezzi per tutti!', tabAll: 'Generale', tabToday: 'Oggi',
           lbBtn: '🏆 Classifica', sound: 'Suono', statsBtn: '📊 Statistiche',
           hint: 'trascina un pezzo sulla griglia · riempi una riga o colonna per eliminarla',
           gameOver: 'PARTITA FINITA', newRecord: '🏆 NUOVO RECORD!', yourScore: 'Il tuo punteggio:',
@@ -1051,6 +1107,8 @@
         },
         pt: {
           subtitle: 'quebra-cabeça de blocos', score: 'PONTOS', best: 'RECORDE',
+          dailyBtn: '📅 Diário', classicBtn: '♾️ Clássico', dailyBestLabel: 'HOJE',
+          dailyBanner: 'Desafio diário — as mesmas peças para todos!', tabAll: 'Geral', tabToday: 'Hoje',
           lbBtn: '🏆 Ranking', sound: 'Som', statsBtn: '📊 Estatísticas',
           hint: 'arraste uma peça para o tabuleiro · complete uma linha ou coluna para limpá-la',
           gameOver: 'FIM DE JOGO', newRecord: '🏆 NOVO RECORDE!', yourScore: 'Sua pontuação:',
@@ -1087,6 +1145,8 @@
         },
         ru: {
           subtitle: 'блочная головоломка', score: 'СЧЁТ', best: 'РЕКОРД',
+          dailyBtn: '📅 День', classicBtn: '♾️ Классика', dailyBestLabel: 'СЕГОДНЯ',
+          dailyBanner: 'Ежедневная головоломка — у всех одинаковые фигуры!', tabAll: 'Общий', tabToday: 'Сегодня',
           lbBtn: '🏆 Рейтинг', sound: 'Звук', statsBtn: '📊 Статистика',
           hint: 'перетащи фигуру на поле · заполни ряд или столбец, чтобы очистить его',
           gameOver: 'ИГРА ОКОНЧЕНА', newRecord: '🏆 НОВЫЙ РЕКОРД!', yourScore: 'Твой счёт:',
@@ -1123,6 +1183,8 @@
         },
         ar: {
           subtitle: 'لغز المكعبات', score: 'النقاط', best: 'الرقم القياسي',
+          dailyBtn: '📅 يومي', classicBtn: '♾️ كلاسيكي', dailyBestLabel: 'اليوم',
+          dailyBanner: 'لغز اليوم — نفس القطع للجميع!', tabAll: 'العام', tabToday: 'اليوم',
           lbBtn: '🏆 الترتيب', sound: 'الصوت', statsBtn: '📊 الإحصائيات',
           hint: 'اسحب قطعة إلى اللوحة · املأ صفًا أو عمودًا لمسحه',
           gameOver: 'انتهت اللعبة', newRecord: '🏆 رقم قياسي جديد!', yourScore: 'نتيجتك:',
@@ -1159,6 +1221,8 @@
         },
         ja: {
           subtitle: 'ブロックパズル', score: 'スコア', best: 'ベスト',
+          dailyBtn: '📅 デイリー', classicBtn: '♾️ クラシック', dailyBestLabel: '今日',
+          dailyBanner: 'デイリーパズル — 全員同じピース！', tabAll: '総合', tabToday: '今日',
           lbBtn: '🏆 ランキング', sound: 'サウンド', statsBtn: '📊 統計',
           hint: 'ピースをボードにドラッグ · 行または列を埋めて消そう',
           gameOver: 'ゲームオーバー', newRecord: '🏆 新記録！', yourScore: 'スコア:',
@@ -1195,6 +1259,8 @@
         },
         ko: {
           subtitle: '블록 퍼즐', score: '점수', best: '최고 기록',
+          dailyBtn: '📅 데일리', classicBtn: '♾️ 클래식', dailyBestLabel: '오늘',
+          dailyBanner: '데일리 퍼즐 — 모두 같은 조각!', tabAll: '전체', tabToday: '오늘',
           lbBtn: '🏆 랭킹', sound: '소리', statsBtn: '📊 통계',
           hint: '조각을 보드로 드래그 · 행이나 열을 채우면 사라져요',
           gameOver: '게임 오버', newRecord: '🏆 신기록!', yourScore: '내 점수:',
@@ -1231,6 +1297,8 @@
         },
         zh: {
           subtitle: '方块拼图', score: '得分', best: '最高分',
+          dailyBtn: '📅 每日', classicBtn: '♾️ 经典', dailyBestLabel: '今日',
+          dailyBanner: '每日谜题 — 所有人相同的方块！', tabAll: '总榜', tabToday: '今日',
           lbBtn: '🏆 排行榜', sound: '声音', statsBtn: '📊 统计',
           hint: '将方块拖到棋盘上 · 填满一行或一列即可消除',
           gameOver: '游戏结束', newRecord: '🏆 新纪录！', yourScore: '你的得分:',
@@ -1377,9 +1445,61 @@
             stats.bestCombo = s.bestCombo | 0;
           }
         } catch (e) { }
+        try {
+          const rawD = await storeGet(DAILY_KEY);
+          if (rawD) {
+            const d = JSON.parse(rawD);
+            if (d && d.date === utcDayStr()) {
+              dailyStore = { date: d.date, score: d.score | 0, submitted: d.submitted | 0 };
+            }
+          }
+        } catch (e) { }
       }
 
       function saveStats() { storeSet(STATS_KEY, JSON.stringify(stats)); }
+
+      /* ---------- günlük bulmaca ---------- */
+      // Günün UTC tarihi seed olur: dünyanın her yerinde herkes aynı parça
+      // dizilimini alır. Gün içinde sınırsız deneme; günün en iyi skoru sayılır.
+
+      function mulberry32(a) {
+        return function () {
+          a |= 0; a = (a + 0x6D2B79F5) | 0;
+          let t = Math.imul(a ^ (a >>> 15), 1 | a);
+          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      function seedFromStr(s) {
+        let h = 2166136261;
+        for (let i = 0; i < s.length; i++) {
+          h ^= s.charCodeAt(i);
+          h = Math.imul(h, 16777619);
+        }
+        return h >>> 0;
+      }
+
+      function utcDayStr() {
+        const d = new Date();
+        return d.getUTCFullYear() + '-' +
+          String(d.getUTCMonth() + 1).padStart(2, '0') + '-' +
+          String(d.getUTCDate()).padStart(2, '0');
+      }
+
+      let mode = 'classic';   // 'classic' | 'daily'
+      let rnd = Math.random;  // günlük modda seed'li üretece geçer
+      let dailyStore = { date: utcDayStr(), score: 0, submitted: 0 };
+
+      function saveDaily() { storeSet(DAILY_KEY, JSON.stringify(dailyStore)); }
+
+      function syncDailyDate() {
+        const today = utcDayStr();
+        if (dailyStore.date !== today) {
+          dailyStore = { date: today, score: 0, submitted: 0 };
+          saveDaily();
+        }
+      }
 
       /* ---------- ses (Web Audio, dosyasız) + titreşim ---------- */
 
@@ -1496,8 +1616,8 @@
       }
 
       function randomShape() {
-        const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
-        const color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+        const shape = SHAPES[Math.floor(rnd() * SHAPES.length)];
+        const color = PALETTE[Math.floor(rnd() * PALETTE.length)];
         return { shape, color, used: false };
       }
 
@@ -1773,10 +1893,17 @@
       function updateScoreUI() {
         scoreEl.textContent = score;
         bumpScore(scoreEl);
-        if (score > best) {
-          best = score;
-          bestEl.textContent = best;
-          storeSet(BEST_KEY, best);
+        // Klasik modda genel rekor, günlük modda günün rekoru izlenir.
+        const prevTop = (mode === 'daily') ? dailyStore.score : best;
+        if (score > prevTop) {
+          if (mode === 'daily') {
+            dailyStore.score = score;
+            saveDaily();
+          } else {
+            best = score;
+            storeSet(BEST_KEY, best);
+          }
+          bestEl.textContent = score;
           // oyun içi rekor kutlaması (oyun başına bir kez)
           if (!recordCelebrated && recordAtStart > 0) {
             recordCelebrated = true;
@@ -1789,7 +1916,8 @@
 
       function showGameOver() {
         finalScoreEl.textContent = score;
-        rescueBtn.style.display = rescueUsed ? 'none' : '';
+        // Günlük modda kurtarma yok: herkes eşit şartlarda yarışır.
+        rescueBtn.style.display = (rescueUsed || mode === 'daily') ? 'none' : '';
         const isNewRecord = score > recordAtStart && score > 0;
         newRecordMsgEl.classList.toggle('hidden-el', !isNewRecord);
         overlayEl.classList.remove('hidden');
@@ -1800,7 +1928,9 @@
         } else {
           sndGameOver();
         }
-        submitScoreIfBetter(); // girişliyse rekoru liderlik tablosuna gönder
+        // girişliyse rekoru ilgili liderlik tablosuna gönder
+        if (mode === 'daily') submitDailyIfBetter();
+        else submitScoreIfBetter();
       }
 
       function rescue() {
@@ -1820,19 +1950,52 @@
       function resetGame() {
         cancelPendingClears();
         if (newSetTimer) { clearTimeout(newSetTimer); newSetTimer = null; }
+        if (mode === 'daily') {
+          syncDailyDate();
+          // Her deneme aynı seed'le başlar: gün boyunca aynı parça dizilimi.
+          rnd = mulberry32(seedFromStr('mozaik-' + dailyStore.date));
+        } else {
+          rnd = Math.random;
+        }
         grid = Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
         score = 0;
         streak = 0;
         rescueUsed = false;
         gameCounted = false;
         recordCelebrated = false;
-        recordAtStart = best;
+        recordAtStart = (mode === 'daily') ? dailyStore.score : best;
         scoreEl.textContent = 0;
+        bestEl.textContent = (mode === 'daily') ? dailyStore.score : best;
         overlayEl.classList.add('hidden');
         clearConfetti();
         renderGrid();
         newPieceSet();
       }
+
+      /* ---------- mod geçişi (klasik / günlük) ---------- */
+
+      const modeBtn = document.getElementById('modeBtn');
+      const dailyBannerEl = document.getElementById('dailyBanner');
+
+      function updateModeUI() {
+        modeBtn.textContent = (mode === 'daily') ? t('classicBtn') : t('dailyBtn');
+        dailyBannerEl.classList.toggle('hidden-el', mode !== 'daily');
+        if (mode === 'daily') {
+          document.getElementById('dailyDateLabel').textContent = '· ' + dailyStore.date;
+        }
+        document.querySelector('[data-i18n="best"]').textContent =
+          (mode === 'daily') ? t('dailyBestLabel') : t('best');
+      }
+
+      function toggleMode() {
+        mode = (mode === 'daily') ? 'classic' : 'daily';
+        if (mode === 'daily') syncDailyDate();
+        sndTick();
+        resetGame();
+        updateModeUI();
+      }
+
+      modeBtn.addEventListener('click', toggleMode);
 
       /* ---------- istatistik ekranı ---------- */
 
@@ -1859,6 +2022,19 @@
       };
       const lbErrorEl = document.getElementById('lbError');
       const lbRowsEl = document.getElementById('lbRows');
+      const lbTabAllBtn = document.getElementById('lbTabAll');
+      const lbTabDailyBtn = document.getElementById('lbTabDaily');
+      let lbTab = 'all'; // 'all' | 'daily'
+
+      function setLbTab(which, reload) {
+        lbTab = which;
+        lbTabAllBtn.classList.toggle('active', which === 'all');
+        lbTabDailyBtn.classList.toggle('active', which === 'daily');
+        if (reload) refreshBoard();
+      }
+
+      lbTabAllBtn.addEventListener('click', () => { if (lbTab !== 'all') { sndTick(); setLbTab('all', true); } });
+      lbTabDailyBtn.addEventListener('click', () => { if (lbTab !== 'daily') { sndTick(); setLbTab('daily', true); } });
 
       function fbReady() {
         return !!(FirebaseAuth && Firestore);
@@ -1892,6 +2068,7 @@
       async function lbOpen() {
         sndTick();
         lbOverlayEl.classList.remove('hidden');
+        setLbTab(mode === 'daily' ? 'daily' : 'all', false);
         if (!fbReady()) {
           document.getElementById('lbLocalBest').textContent = best;
           showLbSection('unavailable');
@@ -1956,6 +2133,8 @@
           });
           myName = name;
           storeSet(SUBMITTED_KEY, '0'); // yeni adla skoru yeniden gönder
+          dailyStore.submitted = 0;
+          saveDaily();
           await refreshBoard();
         } catch (e) {
           lbError(friendlyAuthError(e));
@@ -1976,6 +2155,21 @@
         } catch (e) { /* çevrimdışı olabilir; bir dahaki sefere */ }
       }
 
+      async function submitDailyIfBetter() {
+        if (!fbReady() || !currentUser || !myName) return;
+        syncDailyDate();
+        if (dailyStore.score <= 0 || dailyStore.score <= (dailyStore.submitted | 0)) return;
+        try {
+          await Firestore.setDocument({
+            reference: 'daily/' + dailyStore.date + '/scores/' + currentUser.uid,
+            data: { name: myName, score: dailyStore.score, updatedAt: Date.now() },
+            merge: true
+          });
+          dailyStore.submitted = dailyStore.score;
+          saveDaily();
+        } catch (e) { /* çevrimdışı olabilir; bir dahaki sefere */ }
+      }
+
       async function refreshBoard() {
         showLbSection('list');
         lbRowsEl.innerHTML = '';
@@ -1983,10 +2177,18 @@
         loadingP.className = 'lb-sub';
         loadingP.textContent = t('loading');
         lbRowsEl.appendChild(loadingP);
-        await submitScoreIfBetter();
+        let collRef;
+        if (lbTab === 'daily') {
+          syncDailyDate();
+          await submitDailyIfBetter();
+          collRef = 'daily/' + dailyStore.date + '/scores';
+        } else {
+          await submitScoreIfBetter();
+          collRef = 'leaderboard';
+        }
         try {
           const res = await Firestore.getCollection({
-            reference: 'leaderboard',
+            reference: collRef,
             queryConstraints: [
               { type: 'orderBy', fieldPath: 'score', directionStr: 'desc' },
               { type: 'limit', limit: 20 }
@@ -2024,6 +2226,8 @@
         currentUser = null;
         myName = null;
         storeSet(SUBMITTED_KEY, '0');
+        dailyStore.submitted = 0;
+        saveDaily();
         showLbSection('signin');
         sndTick();
       }

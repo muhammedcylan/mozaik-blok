@@ -234,9 +234,21 @@ service cloud.firestore {
         && request.resource.data.score is int
         && request.resource.data.score >= 0;
     }
+    match /daily/{day}/scores/{uid} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 3
+        && request.resource.data.name.size() <= 16
+        && request.resource.data.score is int
+        && request.resource.data.score >= 0;
+    }
   }
 }
 ```
+
+> **Not:** Günlük bulmaca liderliği `daily/{tarih}/scores/{uid}` yolunu kullanır.
+> Kuralları daha önce yayınladıysan, `daily` bloğunu ekleyip tekrar **Publish** de.
 
 ### 2. Android uygulamasını bağla
 
