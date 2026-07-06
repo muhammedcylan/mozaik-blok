@@ -7,7 +7,10 @@
       "PowerShell(npx cap add android)",
       "PowerShell(npx cap add ios)",
       "PowerShell(npx capacitor-assets generate)",
-      "PowerShell(npx cap sync)"
+      "PowerShell(npx cap sync)",
+      "PowerShell(Test-Path *)",
+      "PowerShell(Start-Process \"C:\\\\Users\\\\ceylan\\\\Desktop\\\\mozaik\\\\www\\\\index.html\")",
+      "PowerShell(Get-PSDrive C | Select-Object @{n='FreeGB';e={[math]::Round\\($_.Free/1GB,2\\)}}, @{n='UsedGB';e={[math]::Round\\($_.Used/1GB,2\\)}})"
     ]
   }
 }

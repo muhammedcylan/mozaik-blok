@@ -35,7 +35,7 @@
   .app{
     max-width: 480px;
     margin: 0 auto;
-    padding-top: calc(22px + env(safe-area-inset-top, 0px));
+    padding-top: calc(16px + env(safe-area-inset-top, 0px));
     padding-right: calc(16px + env(safe-area-inset-right, 0px));
     padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
     padding-left: calc(16px + env(safe-area-inset-left, 0px));
@@ -44,11 +44,11 @@
     align-items:center;
     min-height:100%;
   }
-  header{ width:100%; text-align:center; margin-bottom:18px; }
+  header{ width:100%; text-align:center; margin-bottom:12px; }
   h1{
     font-family:'Cinzel', serif;
     font-weight:700;
-    font-size: clamp(28px, 8vw, 38px);
+    font-size: clamp(26px, 7vw, 36px);
     letter-spacing: 3px;
     margin:0;
     color: var(--gold);
@@ -68,7 +68,7 @@
     display:flex;
     justify-content:center;
     gap:14px;
-    margin-top:16px;
+    margin-top:14px;
   }
   .score-box{
     background: linear-gradient(180deg, var(--panel), var(--bg2));
@@ -86,16 +86,43 @@
     margin-bottom:2px;
   }
   .score-box span:last-child{
+    display:inline-block;
     font-size:22px;
     font-weight:700;
     color: var(--cream);
     font-variant-numeric: tabular-nums;
   }
+  .score-box span.bump{ animation: bump 0.28s ease; }
+  @keyframes bump{
+    0%{ transform:scale(1); }
+    40%{ transform:scale(1.3); color:var(--gold); }
+    100%{ transform:scale(1); }
+  }
+  .controls{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin-top:12px;
+  }
+  .ctrl-btn{
+    background: linear-gradient(180deg, var(--panel), var(--bg2));
+    border: 1px solid rgba(212,175,55,0.25);
+    border-radius: 999px;
+    color: var(--cream);
+    font-family:'Inter', sans-serif;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:0.5px;
+    padding: 8px 14px;
+    cursor:pointer;
+  }
+  .ctrl-btn:active{ transform: scale(0.96); }
+  .ctrl-btn:disabled{ opacity:0.35; pointer-events:none; }
   .board-wrap{
     width:100%;
     display:flex;
     justify-content:center;
-    margin-top: 22px;
+    margin-top: 16px;
   }
   .grid{
     --gap: 4px;
@@ -135,6 +162,12 @@
   }
   .cell.preview-valid{ background: rgba(31,169,166,0.35); border-color: rgba(31,169,166,0.7); }
   .cell.preview-invalid{ background: rgba(193,72,59,0.35); border-color: rgba(193,72,59,0.7); }
+  .cell.placed{ animation: pop 0.2s ease; }
+  @keyframes pop{
+    0%{ transform:scale(0.55); }
+    65%{ transform:scale(1.1); }
+    100%{ transform:scale(1); }
+  }
   .cell.clearing{
     animation: shatter 0.38s ease forwards;
     z-index: 2;
@@ -149,7 +182,7 @@
     display:flex;
     justify-content:space-between;
     gap: 10px;
-    margin-top: 22px;
+    margin-top: 18px;
     min-height: 100px;
   }
   .piece-slot{
@@ -189,12 +222,38 @@
     border-radius: 5px;
     box-shadow: inset 0 -3px 4px rgba(0,0,0,0.25), inset 0 2px 3px rgba(255,255,255,0.25);
   }
+  .float-text{
+    position: fixed;
+    z-index: 998;
+    pointer-events:none;
+    font-weight:800;
+    font-size: 26px;
+    color: var(--gold);
+    text-shadow: 0 2px 10px rgba(0,0,0,0.7), 0 0 20px rgba(212,175,55,0.5);
+    letter-spacing:1px;
+    transform: translate(-50%, 0);
+    animation: floatUp 1s ease forwards;
+    text-align:center;
+    white-space:nowrap;
+  }
+  .float-text small{
+    display:block;
+    font-size: 15px;
+    color: var(--turquoise);
+    letter-spacing:2px;
+  }
+  @keyframes floatUp{
+    0%{ opacity:0; transform: translate(-50%, 14px) scale(0.7); }
+    20%{ opacity:1; transform: translate(-50%, 0) scale(1.08); }
+    100%{ opacity:0; transform: translate(-50%, -60px) scale(1); }
+  }
   .overlay{
     position: fixed; inset:0;
     background: rgba(6,14,28,0.82);
     display:flex; align-items:center; justify-content:center;
     z-index: 1000;
     backdrop-filter: blur(3px);
+    overflow:hidden;
   }
   .overlay.hidden{ display:none; }
   .overlay-card{
@@ -204,6 +263,8 @@
     padding: 32px 36px;
     text-align:center;
     box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    position: relative;
+    z-index: 2;
   }
   .overlay-card h2{
     font-family:'Cinzel', serif;
@@ -211,8 +272,18 @@
     letter-spacing:2px;
     margin: 0 0 10px;
   }
+  .overlay-card h2.title-gold{ color: var(--gold); }
   .overlay-card p{ margin: 0 0 20px; color: var(--cream); font-size:15px; }
   .overlay-card span{ color: var(--gold); font-weight:700; }
+  #newRecordMsg{
+    margin: -8px 0 16px;
+    font-weight:800;
+    font-size:17px;
+    letter-spacing:2px;
+    color: var(--gold);
+    animation: bump 0.6s ease infinite alternate;
+  }
+  #newRecordMsg.hidden{ display:none; }
   .btn{
     border: none;
     font-weight:700;
@@ -234,9 +305,34 @@
     border: 1px solid rgba(237,228,207,0.35);
     color: var(--cream);
   }
-  .btn-row{ display:flex; gap:12px; justify-content:center; }
+  .btn-row{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn-row .btn{ margin:0; }
+  .stat-rows{ margin: 0 0 22px; min-width: 210px; }
+  .stat-row{
+    display:flex;
+    justify-content:space-between;
+    gap: 24px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .stat-row:last-child{ border-bottom:none; }
+  .stat-row b{ color: var(--gold); font-variant-numeric: tabular-nums; }
+  .confetti{
+    position:absolute;
+    top:-16px;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    z-index: 1;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall{
+    0%{ transform: translateY(0) rotate(0deg); opacity:1; }
+    100%{ transform: translateY(110vh) rotate(720deg); opacity:0.7; }
+  }
   footer.hint{
-    margin-top:18px;
+    margin-top:16px;
     font-size:11px;
     letter-spacing:1px;
     color: rgba(237,228,207,0.45);
@@ -251,6 +347,11 @@
     <div class="scores">
       <div class="score-box"><span class="label">SKOR</span><span id="score">0</span></div>
       <div class="score-box"><span class="label">REKOR</span><span id="best">0</span></div>
+    </div>
+    <div class="controls">
+      <button id="undoBtn" class="ctrl-btn" disabled>↩ Geri Al</button>
+      <button id="soundBtn" class="ctrl-btn">🔊 Ses</button>
+      <button id="statsBtn" class="ctrl-btn">📊 İstatistik</button>
     </div>
   </header>
 
@@ -268,8 +369,12 @@
 <div id="gameover" class="overlay hidden">
   <div class="overlay-card">
     <h2>OYUN BİTTİ</h2>
+    <p id="newRecordMsg" class="hidden">🏆 YENİ REKOR!</p>
     <p>Skorun: <span id="finalScore">0</span></p>
-    <button id="restartBtn" class="btn btn-primary">Yeniden Başla</button>
+    <div class="btn-row">
+      <button id="rescueBtn" class="btn btn-secondary">🛟 Kurtar (1 hak)</button>
+      <button id="restartBtn" class="btn btn-primary">Yeniden Başla</button>
+    </div>
   </div>
 </div>
 
@@ -284,11 +389,26 @@
   </div>
 </div>
 
+<div id="statsOverlay" class="overlay hidden">
+  <div class="overlay-card">
+    <h2 class="title-gold">İSTATİSTİK</h2>
+    <div class="stat-rows">
+      <div class="stat-row"><span>Oynanan Oyun</span><b id="statGames">0</b></div>
+      <div class="stat-row"><span>Rekor Skor</span><b id="statBest">0</b></div>
+      <div class="stat-row"><span>En İyi Kombo</span><b id="statCombo">0</b></div>
+      <div class="stat-row"><span>Temizlenen Satır</span><b id="statLines">0</b></div>
+    </div>
+    <button id="statsCloseBtn" class="btn btn-primary">Kapat</button>
+  </div>
+</div>
+
 <script>
 (function(){
   const SIZE = 8;
   const PALETTE = ['#1fa9a6', '#d4af37', '#c1483b', '#8a5a9e', '#3e7cb1'];
   const BEST_KEY = 'bestScore';
+  const SOUND_KEY = 'soundOn';
+  const STATS_KEY = 'stats';
 
   const SHAPES = [
     [[0,0]],
@@ -315,20 +435,33 @@
     [[0,0],[0,1],[0,2],[1,1]],
     [[0,1],[1,0],[1,1],[1,2],[2,1]]
   ];
+  // Kurtarma hakkı kullanılınca verilen küçük parçalar
+  const RESCUE_SHAPES = [ [[0,0]], [[0,0],[0,1]], [[0,0],[1,0]] ];
 
   // Capacitor köprüsü: native'de Capacitor.Plugins dolu gelir, tarayıcıda undefined.
   const Cap = window.Capacitor;
   const Prefs = Cap && Cap.Plugins ? Cap.Plugins.Preferences : null;
   const AppPlugin = Cap && Cap.Plugins ? Cap.Plugins.App : null;
   const Splash = Cap && Cap.Plugins ? Cap.Plugins.SplashScreen : null;
+  const HapticsPlugin = Cap && Cap.Plugins ? Cap.Plugins.Haptics : null;
 
   let grid = Array.from({length:SIZE}, ()=>Array(SIZE).fill(null));
   let pieces = [];
   let score = 0;
   let best = 0;
+  let streak = 0;              // ardışık temizleme serisi (kombo çarpanı)
+  let soundOn = true;
   let cellSize = 0;
   let gridRect = null;
   let dragging = null;
+  let rescueUsed = false;
+  let recordAtStart = 0;       // oyun başındaki rekor; kutlama buna göre
+  let recordCelebrated = false;
+  let gameCounted = false;     // ilk hamlede oyun sayacı artar
+  let undoState = null;        // tek adımlık geri alma anlık görüntüsü
+  let pendingClears = [];      // temizleme animasyonu zamanlayıcıları (undo iptali için)
+  let newSetTimer = null;      // yeni parça seti zamanlayıcısı (undo iptali için)
+  let stats = { games:0, lines:0, bestCombo:0 };
 
   const gridEl = document.getElementById('grid');
   const trayEl = document.getElementById('tray');
@@ -338,28 +471,134 @@
   const overlayEl = document.getElementById('gameover');
   const finalScoreEl = document.getElementById('finalScore');
   const exitOverlayEl = document.getElementById('exitConfirm');
+  const statsOverlayEl = document.getElementById('statsOverlay');
+  const newRecordMsgEl = document.getElementById('newRecordMsg');
+  const rescueBtn = document.getElementById('rescueBtn');
+  const undoBtn = document.getElementById('undoBtn');
+  const soundBtn = document.getElementById('soundBtn');
 
-  async function loadBest(){
+  /* ---------- kalıcı depolama ---------- */
+
+  async function storeGet(key){
     try{
       if(Prefs){
-        const { value } = await Prefs.get({ key: BEST_KEY });
-        best = parseInt(value, 10) || 0;
-      } else {
-        best = parseInt(localStorage.getItem(BEST_KEY), 10) || 0;
+        const { value } = await Prefs.get({ key });
+        return value;
       }
-    }catch(e){ best = 0; }
-    bestEl.textContent = best;
+      return localStorage.getItem(key);
+    }catch(e){ return null; }
   }
 
-  function saveBest(){
+  function storeSet(key, value){
     try{
-      if(Prefs){
-        Prefs.set({ key: BEST_KEY, value: String(best) });
-      } else {
-        localStorage.setItem(BEST_KEY, String(best));
-      }
+      if(Prefs) Prefs.set({ key, value: String(value) });
+      else localStorage.setItem(key, String(value));
     }catch(e){ /* depolama yoksa sessizce geç */ }
   }
+
+  async function loadPersisted(){
+    best = parseInt(await storeGet(BEST_KEY), 10) || 0;
+    bestEl.textContent = best;
+    soundOn = (await storeGet(SOUND_KEY)) !== '0';
+    updateSoundBtn();
+    try{
+      const raw = await storeGet(STATS_KEY);
+      if(raw){
+        const s = JSON.parse(raw);
+        stats.games = s.games|0;
+        stats.lines = s.lines|0;
+        stats.bestCombo = s.bestCombo|0;
+      }
+    }catch(e){}
+  }
+
+  function saveStats(){ storeSet(STATS_KEY, JSON.stringify(stats)); }
+
+  /* ---------- ses (Web Audio, dosyasız) + titreşim ---------- */
+
+  let audioCtx = null;
+
+  function ensureAudio(){
+    if(!audioCtx){
+      try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch(e){ return; }
+    }
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function tone(freq, dur, type, vol, delay){
+    if(!soundOn || !audioCtx) return;
+    const t = audioCtx.currentTime + (delay || 0);
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type || 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(vol || 0.12, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t + dur + 0.03);
+  }
+
+  function sndPlace(){ tone(150, 0.07, 'square', 0.06); tone(85, 0.09, 'sine', 0.1); }
+  function sndClear(n){
+    const k = 1 + Math.min(n-1, 4) * 0.12; // kombo büyüdükçe tizleşir
+    tone(523*k, 0.12, 'sine', 0.12, 0);
+    tone(659*k, 0.12, 'sine', 0.12, 0.06);
+    tone(784*k, 0.2,  'sine', 0.12, 0.12);
+  }
+  function sndGameOver(){ tone(330, 0.25, 'sine', 0.12, 0); tone(220, 0.4, 'sine', 0.12, 0.2); }
+  function sndRecord(){
+    [523, 659, 784, 1047].forEach((f,i)=> tone(f, 0.16, 'triangle', 0.13, i*0.09));
+  }
+  function sndTick(){ tone(880, 0.04, 'square', 0.04); }
+
+  function haptic(style){
+    try{
+      if(HapticsPlugin) HapticsPlugin.impact({ style });
+      else if(navigator.vibrate) navigator.vibrate(style === 'MEDIUM' ? 30 : 12);
+    }catch(e){}
+  }
+
+  function updateSoundBtn(){
+    soundBtn.textContent = soundOn ? '🔊 Ses' : '🔇 Ses';
+  }
+
+  /* ---------- görsel efektler ---------- */
+
+  function bumpScore(el){
+    el.classList.remove('bump');
+    void el.offsetWidth; // animasyonu yeniden tetikle
+    el.classList.add('bump');
+  }
+
+  function showFloat(html){
+    if(!gridRect) updateGridRect();
+    const el = document.createElement('div');
+    el.className = 'float-text';
+    el.innerHTML = html;
+    el.style.left = (gridRect.left + gridRect.width/2) + 'px';
+    el.style.top = (gridRect.top + gridRect.height*0.35) + 'px';
+    document.body.appendChild(el);
+    setTimeout(()=> el.remove(), 1050);
+  }
+
+  function spawnConfetti(){
+    for(let i=0;i<36;i++){
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = (Math.random()*100) + '%';
+      c.style.background = PALETTE[i % PALETTE.length];
+      c.style.animationDuration = (1.6 + Math.random()*1.6) + 's';
+      c.style.animationDelay = (Math.random()*0.8) + 's';
+      overlayEl.appendChild(c);
+    }
+  }
+
+  function clearConfetti(){
+    overlayEl.querySelectorAll('.confetti').forEach(c=>c.remove());
+  }
+
+  /* ---------- oyun kurulumu ---------- */
 
   function buildGridDom(){
     gridEl.innerHTML = '';
@@ -443,6 +682,8 @@
     cellSize = (gridRect.width - 20) / SIZE; // minus padding(10*2)
   }
 
+  /* ---------- sürükleme ---------- */
+
   function buildGhost(shape, color){
     const { rows, cols } = shapeDims(shape);
     ghostEl.innerHTML = '';
@@ -519,8 +760,7 @@
     document.body.style.cursor = 'grabbing';
   }
 
-  // Ghost hareketi rAF ile birleştirilir: her pointermove'da değil,
-  // kare başına en fazla bir kez layout/preview güncellenir.
+  // Ghost hareketi rAF ile birleştirilir: kare başına en fazla bir güncelleme.
   let rafPending = false;
   let pendingX = 0, pendingY = 0;
 
@@ -547,21 +787,94 @@
     }
   }
 
+  /* ---------- geri alma ---------- */
+
+  function snapshotForUndo(){
+    undoState = {
+      grid: grid.map(row=>row.slice()),
+      pieces: pieces.map(p=>({ shape:p.shape, color:p.color, used:p.used })),
+      score, streak
+    };
+    undoBtn.disabled = false;
+  }
+
+  function cancelPendingClears(){
+    pendingClears.forEach(pc=>{
+      clearTimeout(pc.timer);
+      pc.cells.forEach(key=>{
+        const [r,c] = key.split('_').map(Number);
+        cellEl(r,c).classList.remove('clearing');
+      });
+    });
+    pendingClears = [];
+  }
+
+  function undo(){
+    if(!undoState) return;
+    cancelPendingClears();
+    if(newSetTimer){ clearTimeout(newSetTimer); newSetTimer = null; }
+    grid = undoState.grid.map(row=>row.slice());
+    pieces = undoState.pieces.map(p=>({ shape:p.shape, color:p.color, used:p.used }));
+    score = undoState.score;
+    streak = undoState.streak;
+    undoState = null;
+    undoBtn.disabled = true;
+    scoreEl.textContent = score;
+    renderGrid();
+    renderTray();
+    sndTick();
+    haptic('LIGHT');
+  }
+
+  /* ---------- yerleştirme ve temizleme ---------- */
+
   function endDrag(){
     if(!dragging) return;
     const { idx, shape, lastRow, lastCol, sourceEl } = dragging;
     const valid = canPlace(shape, lastRow, lastCol);
     if(valid){
+      snapshotForUndo();
+      if(!gameCounted){
+        gameCounted = true;
+        stats.games++;
+        saveStats();
+      }
       shape.forEach(([dr,dc])=>{
         grid[lastRow+dr][lastCol+dc] = dragging.color;
       });
       score += shape.length;
       pieces[idx].used = true;
       renderGrid();
-      checkClears();
+      // yerleşen hücrelere pop animasyonu
+      shape.forEach(([dr,dc])=>{
+        const el = cellEl(lastRow+dr, lastCol+dc);
+        el.classList.remove('placed');
+        void el.offsetWidth;
+        el.classList.add('placed');
+      });
+
+      const linesCleared = checkClears();
+      if(linesCleared > 0){
+        streak++;
+        const base = linesCleared*100 + (linesCleared>1 ? (linesCleared-1)*50 : 0);
+        const mult = Math.max(1, streak);
+        const gained = base * mult;
+        score += gained;
+        showFloat('+' + gained + (streak>=2 ? '<small>KOMBO x'+streak+'</small>' : ''));
+        sndClear(streak);
+        haptic('MEDIUM');
+        stats.lines += linesCleared;
+        if(streak > stats.bestCombo) stats.bestCombo = streak;
+        saveStats();
+      } else {
+        streak = 0;
+        sndPlace();
+        haptic('LIGHT');
+      }
       updateScoreUI();
+
       if(pieces.every(p=>p.used)){
-        setTimeout(newPieceSet, 120);
+        newSetTimer = setTimeout(()=>{ newSetTimer = null; newPieceSet(); }, 120);
       } else {
         renderTray();
         checkGameOver();
@@ -574,12 +887,13 @@
     dragging = null;
   }
 
+  // Dolu satır/sütunları bulur, animasyonu başlatır, temizlenen satır sayısını döndürür.
   function checkClears(){
     const rows = [];
     const cols = [];
     for(let r=0;r<SIZE;r++) if(grid[r].every(v=>v)) rows.push(r);
     for(let c=0;c<SIZE;c++) if(grid.every(row=>row[c])) cols.push(c);
-    if(!rows.length && !cols.length) return;
+    if(!rows.length && !cols.length) return 0;
 
     const cellsToClear = new Set();
     rows.forEach(r=>{ for(let c=0;c<SIZE;c++) cellsToClear.add(r+'_'+c); });
@@ -590,11 +904,9 @@
       cellEl(r,c).classList.add('clearing');
     });
 
-    const totalLines = rows.length + cols.length;
-    score += totalLines*100 + (totalLines>1 ? (totalLines-1)*50 : 0);
-    updateScoreUI();
-
-    setTimeout(()=>{
+    const entry = { cells: cellsToClear, timer: 0 };
+    entry.timer = setTimeout(()=>{
+      pendingClears = pendingClears.filter(pc=>pc!==entry);
       cellsToClear.forEach(key=>{
         const [r,c] = key.split('_').map(Number);
         grid[r][c] = null;
@@ -602,6 +914,9 @@
       });
       renderGrid();
     }, 380);
+    pendingClears.push(entry);
+
+    return rows.length + cols.length;
   }
 
   function checkGameOver(){
@@ -619,35 +934,97 @@
 
   function updateScoreUI(){
     scoreEl.textContent = score;
+    bumpScore(scoreEl);
     if(score>best){
       best = score;
       bestEl.textContent = best;
-      saveBest();
+      storeSet(BEST_KEY, best);
+      // oyun içi rekor kutlaması (oyun başına bir kez)
+      if(!recordCelebrated && recordAtStart>0){
+        recordCelebrated = true;
+        showFloat('🏆<small>YENİ REKOR!</small>');
+        sndRecord();
+        haptic('MEDIUM');
+      }
     }
   }
 
   function showGameOver(){
     finalScoreEl.textContent = score;
+    undoState = null;
+    undoBtn.disabled = true;
+    rescueBtn.style.display = rescueUsed ? 'none' : '';
+    const isNewRecord = score > recordAtStart && score > 0;
+    newRecordMsgEl.classList.toggle('hidden', !isNewRecord);
     overlayEl.classList.remove('hidden');
+    if(isNewRecord){
+      spawnConfetti();
+      sndRecord();
+      haptic('MEDIUM');
+    } else {
+      sndGameOver();
+    }
+  }
+
+  function rescue(){
+    rescueUsed = true;
+    overlayEl.classList.add('hidden');
+    clearConfetti();
+    pieces = RESCUE_SHAPES.map(shape=>({
+      shape,
+      color: PALETTE[Math.floor(Math.random()*PALETTE.length)],
+      used: false
+    }));
+    undoState = null;
+    undoBtn.disabled = true;
+    sndTick();
+    renderTray();
+    checkGameOver(); // tahta tamamen doluysa tekrar oyun sonu (kurtarma artık yok)
   }
 
   function resetGame(){
+    cancelPendingClears();
+    if(newSetTimer){ clearTimeout(newSetTimer); newSetTimer = null; }
     grid = Array.from({length:SIZE}, ()=>Array(SIZE).fill(null));
     score = 0;
-    updateScoreUI();
+    streak = 0;
+    rescueUsed = false;
+    gameCounted = false;
+    recordCelebrated = false;
+    recordAtStart = best;
+    undoState = null;
+    undoBtn.disabled = true;
+    scoreEl.textContent = 0;
     overlayEl.classList.add('hidden');
+    clearConfetti();
     renderGrid();
     newPieceSet();
   }
 
+  /* ---------- istatistik ekranı ---------- */
+
+  function openStats(){
+    document.getElementById('statGames').textContent = stats.games;
+    document.getElementById('statBest').textContent = best;
+    document.getElementById('statCombo').textContent = stats.bestCombo;
+    document.getElementById('statLines').textContent = stats.lines;
+    statsOverlayEl.classList.remove('hidden');
+    sndTick();
+  }
+
+  /* ---------- geri tuşu ve olaylar ---------- */
+
   // Android donanım geri tuşu:
   // - Çıkış onayı açıksa: onayı kapat (vazgeç)
+  // - İstatistik açıksa: kapat
   // - Oyun bitti ekranındaysa ("menü" durumu): uygulamadan çık
   // - Oyun içindeyse: çıkış onayı göster
   if(AppPlugin){
     AppPlugin.addListener('backButton', ()=>{
       if(!exitOverlayEl.classList.contains('hidden')){
         exitOverlayEl.classList.add('hidden');
+      } else if(!statsOverlayEl.classList.contains('hidden')){
+        statsOverlayEl.classList.add('hidden');
       } else if(!overlayEl.classList.contains('hidden')){
         AppPlugin.exitApp();
       } else {
@@ -662,17 +1039,36 @@
   });
   document.getElementById('exitNoBtn').addEventListener('click', ()=>{
     exitOverlayEl.classList.add('hidden');
+    sndTick();
+  });
+  document.getElementById('restartBtn').addEventListener('click', ()=>{ sndTick(); resetGame(); });
+  document.getElementById('statsCloseBtn').addEventListener('click', ()=>{
+    statsOverlayEl.classList.add('hidden');
+    sndTick();
+  });
+  document.getElementById('statsBtn').addEventListener('click', openStats);
+  rescueBtn.addEventListener('click', rescue);
+  undoBtn.addEventListener('click', undo);
+  soundBtn.addEventListener('click', ()=>{
+    soundOn = !soundOn;
+    storeSet(SOUND_KEY, soundOn ? '1' : '0');
+    updateSoundBtn();
+    if(soundOn){ ensureAudio(); sndTick(); }
   });
 
+  window.addEventListener('pointerdown', ensureAudio);
   window.addEventListener('pointermove', (e)=> moveGhost(e.clientX, e.clientY));
   window.addEventListener('pointerup', endDrag);
   window.addEventListener('pointercancel', endDrag);
-  document.getElementById('restartBtn').addEventListener('click', resetGame);
   window.addEventListener('resize', ()=>{ if(!dragging) updateGridRect(); });
+
+  /* ---------- başlangıç ---------- */
 
   buildGridDom();
   renderGrid();
-  loadBest().then(()=>{
+  loadPersisted().then(()=>{
+    recordAtStart = best;
+    updateGridRect();
     newPieceSet();
     if(Splash) Splash.hide();
   });
