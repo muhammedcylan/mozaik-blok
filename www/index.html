@@ -255,6 +255,42 @@
       }
     }
 
+    .cell.filled.obstacle {
+      background: repeating-linear-gradient(45deg,#1a2b3c,#1a2b3c 4px,#243447 4px,#243447 8px) !important;
+      border-color: rgba(80,120,160,0.3) !important;
+    }
+    .cell.filled.obstacle::after { border-color: rgba(80,120,160,0.15) !important; }
+    .cell.lucky {
+      border-color: rgba(212,175,55,0.7) !important;
+      box-shadow: inset 0 0 0 2px rgba(212,175,55,0.5), 0 0 8px rgba(212,175,55,0.25);
+    }
+    .cell.lucky:not(.filled) { background: rgba(212,175,55,0.10) !important; }
+    .cell.lucky-shine { animation: luckyShine 0.7s ease forwards; z-index: 3; }
+    @keyframes luckyShine {
+      0%  { transform:scale(1);    filter:brightness(1); }
+      35% { transform:scale(1.22); filter:brightness(3.8); box-shadow:0 0 28px 10px rgba(212,175,55,1); }
+      100%{ transform:scale(1);    filter:brightness(1.4); }
+    }
+    .piece-cell.crystal {
+      background: linear-gradient(135deg,#a8edea,#fff,#d4af37,#a8edea) !important;
+      background-size: 200% 200% !important;
+      animation: crystalGlow 1.2s ease infinite alternate;
+    }
+    @keyframes crystalGlow {
+      from { box-shadow:0 0 8px rgba(168,237,234,0.6); background-position:0% 50%; }
+      to   { box-shadow:0 0 20px rgba(212,175,55,0.9); background-position:100% 50%; }
+    }
+    .chain-bar {
+      display:flex; align-items:center; gap:8px;
+      padding:4px 18px; border-radius:999px;
+      background:linear-gradient(180deg,var(--panel),var(--bg2));
+      border:1px solid rgba(31,169,166,0.35);
+      font-size:13px; font-weight:700; color:var(--turquoise);
+      letter-spacing:1px; margin-top:6px;
+      box-shadow:0 0 10px rgba(31,169,166,0.2);
+    }
+    .chain-bar.hidden { display:none; }
+    .chain-bar span { color:var(--cream); font-size:16px; }
     .cell.clearing {
       animation: shatter 0.38s ease forwards;
       z-index: 2;
@@ -913,6 +949,8 @@
       </div>
     </header>
 
+    <div id="chainBar" class="chain-bar hidden">ZİNCİR <span id="chainMult">×2</span></div>
+
     <div class="board-wrap">
       <div id="grid" class="grid"></div>
     </div>
@@ -1071,6 +1109,10 @@
       const DAILY_KEY = 'daily';
       const TUTORIAL_KEY = 'tutorialDone';
       const REVIEW_KEY = 'reviewAsked';
+
+      const OBSTACLE_COLOR = 'obstacle';
+      const OBSTACLE_FIRST = 500;
+      const OBSTACLE_STEP  = 400;
 
       const SHAPES = [
         [[0, 0]],
@@ -1672,6 +1714,11 @@
       let pendingClears = [];      // temizleme animasyonu zamanlayıcıları
       let newSetTimer = null;
       let stats = { games: 0, lines: 0, bestCombo: 0 };
+      let nextObstacleAt = OBSTACLE_FIRST;
+      let luckySquare = null;
+      let colorChain = 0;
+      let lastPlacedColor = null;
+      let roundCount = 0;
 
       const gridEl = document.getElementById('grid');
       const trayEl = document.getElementById('tray');
@@ -1886,19 +1933,33 @@
             const el = cellEl(r, c);
             const val = grid[r][c];
             el.classList.toggle('filled', !!val);
-            el.style.background = val ? val : '';
+            el.classList.toggle('obstacle', val === OBSTACLE_COLOR);
+            el.style.background = (val && val !== OBSTACLE_COLOR) ? val : '';
+            const inLucky = luckySquare &&
+              r >= luckySquare.r0 && r <= luckySquare.r0 + 1 &&
+              c >= luckySquare.c0 && c <= luckySquare.c0 + 1;
+            el.classList.toggle('lucky', !!inLucky);
           }
         }
       }
 
       function randomShape() {
-        const shape = SHAPES[Math.floor(rnd() * SHAPES.length)];
+        let pool;
+        if (score < 400)      pool = SHAPES.filter(s => s.length <= 3);
+        else if (score < 800) pool = SHAPES.filter(s => s.length <= 4);
+        else                  pool = SHAPES;
+        const shape = pool[Math.floor(rnd() * pool.length)];
         const color = PALETTE[Math.floor(rnd() * PALETTE.length)];
         return { shape, color, used: false };
       }
 
       function newPieceSet() {
+        roundCount++;
         pieces = [randomShape(), randomShape(), randomShape()];
+        if (roundCount % 5 === 0) {
+          const slot = Math.floor(rnd() * 3);
+          pieces[slot] = { shape: [[0, 0]], color: '#a8edea', used: false, crystal: true };
+        }
         renderTray();
         checkGameOver();
       }
@@ -1927,8 +1988,8 @@
                 const has = p.shape.some(([dr, dc]) => dr === r && dc === c);
                 const cd = document.createElement('div');
                 if (has) {
-                  cd.className = 'piece-cell';
-                  cd.style.background = p.color;
+                  cd.className = p.crystal ? 'piece-cell crystal' : 'piece-cell';
+                  if (!p.crystal) cd.style.background = p.color;
                 }
                 pieceEl.appendChild(cd);
               }
@@ -1942,7 +2003,7 @@
 
       function updateGridRect() {
         gridRect = gridEl.getBoundingClientRect();
-        cellSize = (gridRect.width - 20) / SIZE; // minus padding(10*2)
+        cellSize = (gridRect.width - 20 - (SIZE - 1) * 4) / SIZE; // padding + gap'ler
       }
 
       /* ---------- sürükleme ---------- */
@@ -1984,6 +2045,99 @@
         return { row, col, left, top };
       }
 
+      function addObstacles() {
+        const empty = [];
+        for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) {
+          if (!grid[r][c]) empty.push([r, c]);
+        }
+        const count = Math.min(3, Math.max(1, Math.ceil(empty.length * 0.04)));
+        for (let i = 0; i < count && empty.length > 0; i++) {
+          const idx = Math.floor(Math.random() * empty.length);
+          const [r, c] = empty.splice(idx, 1)[0];
+          grid[r][c] = OBSTACLE_COLOR;
+        }
+        renderGrid();
+        checkGameOver();
+      }
+
+      function pickLuckySquare() {
+        const candidates = [];
+        for (let r = 0; r < SIZE - 1; r++) for (let c = 0; c < SIZE - 1; c++) {
+          const empties = [[r,c],[r,c+1],[r+1,c],[r+1,c+1]].filter(([rr,cc]) => !grid[rr][cc]).length;
+          if (empties >= 2) candidates.push([r, c]);
+        }
+        luckySquare = candidates.length
+          ? (([r0, c0]) => ({ r0, c0 }))(candidates[Math.floor(Math.random() * candidates.length)])
+          : null;
+        renderGrid();
+      }
+
+      function checkLuckySquare() {
+        if (!luckySquare) return;
+        const { r0, c0 } = luckySquare;
+        const cells = [[r0,c0],[r0,c0+1],[r0+1,c0],[r0+1,c0+1]];
+        if (!cells.every(([r, c]) => grid[r][c])) return;
+        cells.forEach(([r, c]) => {
+          const el = cellEl(r, c);
+          el.classList.add('lucky-shine');
+          setTimeout(() => el.classList.remove('lucky-shine'), 700);
+        });
+        score += 150;
+        luckySquare = null;
+        showFloat('+150 ALTIN MOZAİK!');
+        haptic('MEDIUM');
+        updateScoreUI();
+        renderGrid();
+        setTimeout(pickLuckySquare, 950);
+      }
+
+      function placeCrystal(r0, c0) {
+        const toClear = new Set();
+        for (let c = 0; c < SIZE; c++) toClear.add(r0 + '_' + c);
+        for (let r = 0; r < SIZE; r++) toClear.add(r + '_' + c0);
+        toClear.forEach(key => {
+          const [r, c] = key.split('_').map(Number);
+          cellEl(r, c).classList.add('clearing');
+        });
+        const cleared = [...toClear].filter(k => { const [r,c]=k.split('_').map(Number); return !!grid[r][c]; }).length;
+        score += cleared * 12;
+        showFloat('+' + (cleared * 12) + ' KRİSTAL!');
+        haptic('MEDIUM');
+        updateScoreUI();
+        setTimeout(() => {
+          toClear.forEach(key => {
+            const [r, c] = key.split('_').map(Number);
+            grid[r][c] = null;
+            cellEl(r, c).classList.remove('clearing');
+          });
+          renderGrid();
+          if (pieces.every(p => p.used)) {
+            newSetTimer = setTimeout(() => { newSetTimer = null; newPieceSet(); }, 120);
+          } else {
+            renderTray();
+            checkGameOver();
+          }
+          setTimeout(pickLuckySquare, 100);
+        }, 400);
+      }
+
+      function chainMultiplier() {
+        if (colorChain < 2) return 1;
+        return Math.min(1 + (colorChain - 1) * 0.5, 4);
+      }
+
+      function renderChain() {
+        const bar = document.getElementById('chainBar');
+        const mult = document.getElementById('chainMult');
+        if (!bar) return;
+        if (colorChain >= 2) {
+          mult.textContent = '×' + chainMultiplier().toFixed(1).replace('.0', '');
+          bar.classList.remove('hidden');
+        } else {
+          bar.classList.add('hidden');
+        }
+      }
+
       function canPlace(shape, r0, c0) {
         for (const [dr, dc] of shape) {
           const rr = r0 + dr, cc = c0 + dc;
@@ -2015,7 +2169,7 @@
         if (pieces[idx].used) return;
         e.preventDefault();
         updateGridRect();
-        dragging = { idx, shape: pieces[idx].shape, color: pieces[idx].color };
+        dragging = { idx, shape: pieces[idx].shape, color: pieces[idx].color, crystal: !!pieces[idx].crystal };
         buildGhost(dragging.shape, dragging.color);
         applyGhostMove(e.clientX, e.clientY);
         pieceEl.classList.add('dragging-source');
@@ -2068,24 +2222,41 @@
         const { idx, shape, lastRow, lastCol, sourceEl } = dragging;
         const valid = canPlace(shape, lastRow, lastCol);
         if (valid) {
-          if (!gameCounted) {
-            gameCounted = true;
-            stats.games++;
-            saveStats();
+          if (!gameCounted) { gameCounted = true; stats.games++; saveStats(); }
+          pieces[idx].used = true;
+
+          if (dragging.crystal) {
+            colorChain = 0; lastPlacedColor = null; renderChain();
+            if (sourceEl) sourceEl.classList.remove('dragging-source');
+            clearPreview();
+            ghostEl.classList.add('hidden');
+            document.body.style.cursor = '';
+            dragging = null;
+            placeCrystal(lastRow, lastCol);
+            return;
           }
+
           shape.forEach(([dr, dc]) => {
             grid[lastRow + dr][lastCol + dc] = dragging.color;
           });
-          score += shape.length;
-          pieces[idx].used = true;
+
+          if (dragging.color === lastPlacedColor) {
+            colorChain = Math.min(colorChain + 1, 8);
+          } else {
+            colorChain = 1;
+            lastPlacedColor = dragging.color;
+          }
+          const cMult = chainMultiplier();
+          score += Math.round(shape.length * cMult);
+          if (colorChain >= 2) showFloat('ZİNCİR ×' + cMult.toFixed(1).replace('.0', ''));
+          renderChain();
+
           renderGrid();
-          // yerleşen hücrelere pop animasyonu
           shape.forEach(([dr, dc]) => {
             const el = cellEl(lastRow + dr, lastCol + dc);
-            el.classList.remove('placed');
-            void el.offsetWidth;
-            el.classList.add('placed');
+            el.classList.remove('placed'); void el.offsetWidth; el.classList.add('placed');
           });
+          checkLuckySquare();
 
           const linesCleared = checkClears();
           if (linesCleared > 0) {
@@ -2129,6 +2300,17 @@
         for (let c = 0; c < SIZE; c++) if (grid.every(row => row[c])) cols.push(c);
         if (!rows.length && !cols.length) return 0;
 
+        let rainbowBonus = 0;
+        rows.forEach(r => {
+          const colors = new Set(grid[r].filter(v => v && v !== OBSTACLE_COLOR));
+          if (colors.size >= 3) rainbowBonus += colors.size === 5 ? 200 : colors.size === 4 ? 100 : 50;
+        });
+        cols.forEach(c => {
+          const colors = new Set(grid.map(row => row[c]).filter(v => v && v !== OBSTACLE_COLOR));
+          if (colors.size >= 3) rainbowBonus += colors.size === 5 ? 200 : colors.size === 4 ? 100 : 50;
+        });
+        if (rainbowBonus > 0) { score += rainbowBonus; showFloat('+' + rainbowBonus + ' GÖKKUŞAĞI!'); }
+
         const cellsToClear = new Set();
         rows.forEach(r => { for (let c = 0; c < SIZE; c++) cellsToClear.add(r + '_' + c); });
         cols.forEach(c => { for (let r = 0; r < SIZE; r++) cellsToClear.add(r + '_' + c); });
@@ -2169,6 +2351,10 @@
       function updateScoreUI() {
         scoreEl.textContent = score;
         bumpScore(scoreEl);
+        if (score >= nextObstacleAt) {
+          nextObstacleAt += OBSTACLE_STEP;
+          setTimeout(addObstacles, 420);
+        }
         // Klasik modda genel rekor, günlük modda günün rekoru izlenir.
         const prevTop = (mode === 'daily') ? dailyStore.score : best;
         if (score > prevTop) {
@@ -2255,6 +2441,10 @@
         rescueUsed = false;
         gameCounted = false;
         recordCelebrated = false;
+        nextObstacleAt = OBSTACLE_FIRST;
+        luckySquare = null;
+        colorChain = 0; lastPlacedColor = null; roundCount = 0;
+        renderChain();
         recordAtStart = (mode === 'daily') ? dailyStore.score : best;
         scoreEl.textContent = 0;
         bestEl.textContent = (mode === 'daily') ? dailyStore.score : best;
@@ -2262,6 +2452,7 @@
         clearConfetti();
         renderGrid();
         newPieceSet();
+        pickLuckySquare();
       }
 
       /* ---------- mod geçişi (klasik / günlük) ---------- */
@@ -2728,6 +2919,7 @@
         recordAtStart = best;
         updateGridRect();
         newPieceSet();
+        pickLuckySquare();
         await checkConsent();
         if (Splash) Splash.hide();
         // Onay zaten verilmişse öğreticiyi (henüz görülmediyse) göster;

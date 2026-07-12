@@ -131,6 +131,66 @@
   }
   .cell.preview-valid{ background: rgba(31,169,166,0.35); border-color: rgba(31,169,166,0.7); }
   .cell.preview-invalid{ background: rgba(193,72,59,0.35); border-color: rgba(193,72,59,0.7); }
+  .cell.filled.obstacle{
+    background: repeating-linear-gradient(45deg,#1a2b3c,#1a2b3c 4px,#243447 4px,#243447 8px) !important;
+    border-color: rgba(80,120,160,0.3) !important;
+  }
+  .cell.filled.obstacle::after{ border-color: rgba(80,120,160,0.15) !important; }
+  .cell.lucky{
+    border-color: rgba(212,175,55,0.7) !important;
+    box-shadow: inset 0 0 0 2px rgba(212,175,55,0.5), 0 0 8px rgba(212,175,55,0.25);
+  }
+  .cell.lucky:not(.filled){
+    background: rgba(212,175,55,0.10) !important;
+  }
+  .cell.lucky-shine{
+    animation: luckyShine 0.7s ease forwards;
+    z-index: 3;
+  }
+  @keyframes luckyShine{
+    0%  { transform:scale(1);    filter:brightness(1); }
+    35% { transform:scale(1.22); filter:brightness(3.8); box-shadow:0 0 28px 10px rgba(212,175,55,1); }
+    100%{ transform:scale(1);    filter:brightness(1.4); }
+  }
+  .bonus-popup{
+    position:fixed;
+    font-family:'Cinzel',serif;
+    font-size:20px;
+    font-weight:700;
+    color:#d4af37;
+    text-shadow:0 0 14px rgba(212,175,55,0.95), 0 2px 4px rgba(0,0,0,0.9);
+    pointer-events:none;
+    z-index:9999;
+    white-space:nowrap;
+    transform:translateX(-50%);
+    animation:floatUp 1.4s ease forwards;
+  }
+  @keyframes floatUp{
+    0%  { opacity:1; transform:translateX(-50%) translateY(0); }
+    100%{ opacity:0; transform:translateX(-50%) translateY(-72px); }
+  }
+  .piece-cell.crystal{
+    background: linear-gradient(135deg,#a8edea,#ffffff,#d4af37,#a8edea) !important;
+    background-size: 200% 200% !important;
+    animation: crystalGlow 1.2s ease infinite alternate;
+  }
+  @keyframes crystalGlow{
+    from{ box-shadow:0 0 8px rgba(168,237,234,0.6); background-position:0% 50%; }
+    to{   box-shadow:0 0 20px rgba(212,175,55,0.9);  background-position:100% 50%; }
+  }
+  .chain-bar{
+    display:flex; align-items:center; gap:8px;
+    padding:4px 18px; border-radius:999px;
+    background:linear-gradient(180deg,var(--panel),var(--bg2));
+    border:1px solid rgba(31,169,166,0.35);
+    font-size:13px; font-weight:700; color:var(--turquoise);
+    letter-spacing:1px;
+    box-shadow:0 0 10px rgba(31,169,166,0.2);
+    transition:opacity 0.2s;
+    margin-top:6px;
+  }
+  .chain-bar.hidden{ display:none; }
+  .chain-bar span{ color:var(--cream); font-size:16px; }
   .cell.clearing{
     animation: shatter 0.38s ease forwards;
     z-index: 2;
@@ -240,6 +300,8 @@
     </div>
   </header>
 
+  <div id="chainBar" class="chain-bar hidden">ZİNCİR <span id="chainMult">×2</span></div>
+
   <div class="board-wrap">
     <div id="grid" class="grid"></div>
   </div>
@@ -263,6 +325,9 @@
 (function(){
   const SIZE = 8;
   const PALETTE = ['#1fa9a6', '#d4af37', '#c1483b', '#8a5a9e', '#3e7cb1'];
+  const OBSTACLE_COLOR = 'obstacle';
+  const OBSTACLE_FIRST = 500;
+  const OBSTACLE_STEP  = 400;
 
   const SHAPES = [
     [[0,0]],
@@ -293,10 +358,15 @@
   let grid = Array.from({length:SIZE}, ()=>Array(SIZE).fill(null));
   let pieces = [];
   let score = 0;
-  let best = 0;
   let cellSize = 0;
   let gridRect = null;
   let dragging = null;
+  let nextObstacleAt = OBSTACLE_FIRST;
+  let luckySquare = null;
+  let colorChain = 0;
+  let lastPlacedColor = null;
+  let roundCount = 0;
+  let best = parseInt(localStorage.getItem('mozaik_best') || '0', 10);
 
   const gridEl = document.getElementById('grid');
   const trayEl = document.getElementById('tray');
@@ -329,19 +399,33 @@
         const el = cellEl(r,c);
         const val = grid[r][c];
         el.classList.toggle('filled', !!val);
-        el.style.background = val ? val : '';
+        el.classList.toggle('obstacle', val === OBSTACLE_COLOR);
+        el.style.background = (val && val !== OBSTACLE_COLOR) ? val : '';
+        const inLucky = luckySquare &&
+          r >= luckySquare.r0 && r <= luckySquare.r0+1 &&
+          c >= luckySquare.c0 && c <= luckySquare.c0+1;
+        el.classList.toggle('lucky', !!inLucky);
       }
     }
   }
 
   function randomShape(){
-    const shape = SHAPES[Math.floor(Math.random()*SHAPES.length)];
-    const color = PALETTE[Math.floor(Math.random()*PALETTE.length)];
+    let pool;
+    if(score < 400)      pool = SHAPES.filter(s => s.length <= 3);
+    else if(score < 800) pool = SHAPES.filter(s => s.length <= 4);
+    else                 pool = SHAPES;
+    const shape = pool[Math.floor(Math.random() * pool.length)];
+    const color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
     return { shape, color, used:false };
   }
 
   function newPieceSet(){
+    roundCount++;
     pieces = [randomShape(), randomShape(), randomShape()];
+    if(roundCount % 5 === 0){
+      const slot = Math.floor(Math.random() * 3);
+      pieces[slot] = { shape:[[0,0]], color:'#a8edea', used:false, crystal:true };
+    }
     renderTray();
     checkGameOver();
   }
@@ -370,8 +454,8 @@
             const has = p.shape.some(([dr,dc])=>dr===r&&dc===c);
             const cd = document.createElement('div');
             if(has){
-              cd.className = 'piece-cell';
-              cd.style.background = p.color;
+              cd.className = p.crystal ? 'piece-cell crystal' : 'piece-cell';
+              if(!p.crystal) cd.style.background = p.color;
             }
             pieceEl.appendChild(cd);
           }
@@ -385,7 +469,7 @@
 
   function updateGridRect(){
     gridRect = gridEl.getBoundingClientRect();
-    cellSize = (gridRect.width - 20) / SIZE; // minus padding(10*2)
+    cellSize = (gridRect.width - 20 - (SIZE - 1) * 4) / SIZE; // padding(10*2) + gap arasi(7*4)
   }
 
   function buildGhost(shape, color){
@@ -420,9 +504,108 @@
     const lift = 90;
     const left = clientX - w/2;
     const top = clientY - lift - h/2;
-    const col = Math.round((left - (gridRect.left+10)) / (cellSize+ (4*(cellSize/cellSize)) ));
+    const col = Math.round((left - (gridRect.left+10)) / (cellSize + 4));
     const row = Math.round((top - (gridRect.top+10)) / (cellSize+4));
     return { row, col, left, top };
+  }
+
+  function addObstacles(){
+    const empty = [];
+    for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){
+      if(!grid[r][c]) empty.push([r,c]);
+    }
+    const count = Math.min(3, Math.max(1, Math.ceil(empty.length * 0.04)));
+    for(let i=0;i<count && empty.length>0;i++){
+      const idx = Math.floor(Math.random() * empty.length);
+      const [r,c] = empty.splice(idx,1)[0];
+      grid[r][c] = OBSTACLE_COLOR;
+    }
+    renderGrid();
+    checkGameOver();
+  }
+
+  function pickLuckySquare(){
+    const candidates = [];
+    for(let r=0;r<SIZE-1;r++) for(let c=0;c<SIZE-1;c++){
+      const empties = [[r,c],[r,c+1],[r+1,c],[r+1,c+1]]
+        .filter(([rr,cc])=>!grid[rr][cc]).length;
+      if(empties >= 2) candidates.push([r,c]);
+    }
+    luckySquare = candidates.length
+      ? (([r0,c0])=>({r0,c0}))(candidates[Math.floor(Math.random()*candidates.length)])
+      : null;
+    renderGrid();
+  }
+
+  function checkLuckySquare(){
+    if(!luckySquare) return;
+    const {r0,c0} = luckySquare;
+    const cells = [[r0,c0],[r0,c0+1],[r0+1,c0],[r0+1,c0+1]];
+    if(!cells.every(([r,c])=>grid[r][c])) return;
+    cells.forEach(([r,c])=>{
+      const el = cellEl(r,c);
+      el.classList.add('lucky-shine');
+      setTimeout(()=>el.classList.remove('lucky-shine'), 700);
+    });
+    score += 150;
+    luckySquare = null;
+    showBonusText('+150 ALTIN MOZAİK!');
+    updateScoreUI();
+    renderGrid();
+    setTimeout(pickLuckySquare, 950);
+  }
+
+  function showBonusText(text){
+    const rect = gridEl.getBoundingClientRect();
+    const el = document.createElement('div');
+    el.className = 'bonus-popup';
+    el.textContent = text;
+    el.style.left = (rect.left + rect.width / 2) + 'px';
+    el.style.top  = (rect.top  + rect.height / 3) + 'px';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 1400);
+  }
+
+  function placeCrystal(r0, c0){
+    const toClear = new Set();
+    for(let c=0;c<SIZE;c++) toClear.add(r0+'_'+c);
+    for(let r=0;r<SIZE;r++) toClear.add(r+'_'+c0);
+    toClear.forEach(key=>{
+      const [r,c]=key.split('_').map(Number);
+      cellEl(r,c).classList.add('clearing');
+    });
+    const cleared=[...toClear].filter(k=>{const[r,c]=k.split('_').map(Number);return!!grid[r][c];}).length;
+    navigator.vibrate?.([20,10,20,10,60]);
+    score += cleared * 12;
+    showBonusText(`+${cleared*12} KRİSTAL!`);
+    updateScoreUI();
+    setTimeout(()=>{
+      toClear.forEach(key=>{
+        const [r,c]=key.split('_').map(Number);
+        grid[r][c]=null;
+        cellEl(r,c).classList.remove('clearing');
+      });
+      renderGrid();
+      if(pieces.every(p=>p.used)) setTimeout(newPieceSet,120);
+      else { renderTray(); checkGameOver(); }
+      setTimeout(pickLuckySquare, 100);
+    }, 400);
+  }
+
+  function chainMultiplier(){
+    if(colorChain < 2) return 1;
+    return Math.min(1 + (colorChain-1)*0.5, 4);
+  }
+
+  function renderChain(){
+    const bar = document.getElementById('chainBar');
+    const mult = document.getElementById('chainMult');
+    if(colorChain >= 2){
+      mult.textContent = '×' + chainMultiplier().toFixed(1).replace('.0','');
+      bar.classList.remove('hidden');
+    } else {
+      bar.classList.add('hidden');
+    }
   }
 
   function canPlace(shape, r0, c0){
@@ -456,7 +639,7 @@
     if(pieces[idx].used) return;
     e.preventDefault();
     updateGridRect();
-    dragging = { idx, shape: pieces[idx].shape, color: pieces[idx].color };
+    dragging = { idx, shape: pieces[idx].shape, color: pieces[idx].color, crystal: !!pieces[idx].crystal };
     buildGhost(dragging.shape, dragging.color);
     moveGhost(e.clientX, e.clientY);
     pieceEl.classList.add('dragging-source');
@@ -479,12 +662,33 @@
     const { idx, shape, lastRow, lastCol, sourceEl } = dragging;
     const valid = canPlace(shape, lastRow, lastCol);
     if(valid){
+      pieces[idx].used = true;
+      if(dragging.crystal){
+        colorChain = 0; lastPlacedColor = null; renderChain();
+        clearPreview();
+        ghostEl.classList.add('hidden');
+        document.body.style.cursor = '';
+        if(sourceEl) sourceEl.classList.remove('dragging-source');
+        dragging = null;
+        placeCrystal(lastRow, lastCol);
+        return;
+      }
       shape.forEach(([dr,dc])=>{
         grid[lastRow+dr][lastCol+dc] = dragging.color;
       });
-      score += shape.length;
-      pieces[idx].used = true;
+      navigator.vibrate?.(8);
+      if(dragging.color === lastPlacedColor){
+        colorChain = Math.min(colorChain+1, 8);
+      } else {
+        colorChain = 1;
+        lastPlacedColor = dragging.color;
+      }
+      const mult = chainMultiplier();
+      score += Math.round(shape.length * mult);
+      if(colorChain >= 2) showBonusText('ZİNCİR ×' + mult.toFixed(1).replace('.0',''));
+      renderChain();
       renderGrid();
+      checkLuckySquare();
       checkClears();
       updateScoreUI();
       if(pieces.every(p=>p.used)){
@@ -508,6 +712,18 @@
     for(let c=0;c<SIZE;c++) if(grid.every(row=>row[c])) cols.push(c);
     if(!rows.length && !cols.length) return;
 
+    // Gökkuşağı bonusu: temizlemeden önce renk sayısını hesapla
+    let rainbowBonus = 0;
+    rows.forEach(r=>{
+      const colors = new Set(grid[r].filter(v=>v&&v!==OBSTACLE_COLOR));
+      if(colors.size >= 3) rainbowBonus += colors.size === 5 ? 200 : colors.size === 4 ? 100 : 50;
+    });
+    cols.forEach(c=>{
+      const colors = new Set(grid.map(row=>row[c]).filter(v=>v&&v!==OBSTACLE_COLOR));
+      if(colors.size >= 3) rainbowBonus += colors.size === 5 ? 200 : colors.size === 4 ? 100 : 50;
+    });
+    if(rainbowBonus > 0) showBonusText(`+${rainbowBonus} GÖKKUŞAĞI!`);
+
     const cellsToClear = new Set();
     rows.forEach(r=>{ for(let c=0;c<SIZE;c++) cellsToClear.add(r+'_'+c); });
     cols.forEach(c=>{ for(let r=0;r<SIZE;r++) cellsToClear.add(r+'_'+c); });
@@ -517,8 +733,9 @@
       cellEl(r,c).classList.add('clearing');
     });
 
+    navigator.vibrate?.(totalLines > 1 ? [30,15,30] : 40);
     const totalLines = rows.length + cols.length;
-    score += totalLines*100 + (totalLines>1 ? (totalLines-1)*50 : 0);
+    score += totalLines*100 + (totalLines>1 ? (totalLines-1)*50 : 0) + rainbowBonus;
     updateScoreUI();
 
     setTimeout(()=>{
@@ -546,7 +763,15 @@
 
   function updateScoreUI(){
     scoreEl.textContent = score;
-    if(score>best){ best = score; bestEl.textContent = best; }
+    if(score > best){
+      best = score;
+      bestEl.textContent = best;
+      localStorage.setItem('mozaik_best', best);
+    }
+    if(score >= nextObstacleAt){
+      nextObstacleAt += OBSTACLE_STEP;
+      setTimeout(addObstacles, 420);
+    }
   }
 
   function showGameOver(){
@@ -557,10 +782,15 @@
   function resetGame(){
     grid = Array.from({length:SIZE}, ()=>Array(SIZE).fill(null));
     score = 0;
+    nextObstacleAt = OBSTACLE_FIRST;
+    luckySquare = null;
+    colorChain = 0; lastPlacedColor = null; roundCount = 0;
+    renderChain();
     updateScoreUI();
     overlayEl.classList.add('hidden');
     renderGrid();
     newPieceSet();
+    pickLuckySquare();
   }
 
   window.addEventListener('pointermove', (e)=> moveGhost(e.clientX, e.clientY));
@@ -569,9 +799,11 @@
   document.getElementById('restartBtn').addEventListener('click', resetGame);
   window.addEventListener('resize', ()=>{ if(!dragging) updateGridRect(); });
 
+  bestEl.textContent = best;
   buildGridDom();
   renderGrid();
   newPieceSet();
+  pickLuckySquare();
 })();
 </script>
 </body>
