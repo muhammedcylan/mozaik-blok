@@ -155,20 +155,42 @@
   .bonus-popup{
     position:fixed;
     font-family:'Cinzel',serif;
-    font-size:20px;
+    font-size:36px;
     font-weight:700;
-    color:#d4af37;
-    text-shadow:0 0 14px rgba(212,175,55,0.95), 0 2px 4px rgba(0,0,0,0.9);
+    color:#fff;
+    text-shadow:0 0 14px #d4af37, 0 0 30px rgba(212,175,55,0.8), 0 0 60px rgba(212,175,55,0.4), 0 3px 8px rgba(0,0,0,0.95);
+    -webkit-text-stroke:1px rgba(212,175,55,0.6);
     pointer-events:none;
     z-index:9999;
     white-space:nowrap;
+    letter-spacing:3px;
     transform:translateX(-50%);
-    animation:floatUp 1.4s ease forwards;
+    animation:floatUp 1.3s cubic-bezier(0.22,0.61,0.36,1) forwards;
   }
   @keyframes floatUp{
-    0%  { opacity:1; transform:translateX(-50%) translateY(0); }
-    100%{ opacity:0; transform:translateX(-50%) translateY(-72px); }
+    0%  { opacity:0; transform:translateX(-50%) translateY(24px) scale(0.25); }
+    16% { opacity:1; transform:translateX(-50%) translateY(-12px) scale(1.35); }
+    28% { transform:translateX(-50%) translateY(-8px)  scale(0.92); }
+    42% { transform:translateX(-50%) translateY(-14px) scale(1.06); }
+    60% { opacity:1; transform:translateX(-50%) translateY(-20px) scale(1); }
+    100%{ opacity:0; transform:translateX(-50%) translateY(-95px) scale(0.8); }
   }
+  .screen-flash{
+    position:fixed; inset:0;
+    pointer-events:none; z-index:997;
+    animation:screenFlash 0.55s ease forwards;
+  }
+  @keyframes screenFlash{ 0%{opacity:1;} 100%{opacity:0;} }
+  @keyframes gridShake{
+    0%,100%{ transform:translate(0); }
+    12%{ transform:translate(-6px,-3px) rotate(-0.5deg); }
+    25%{ transform:translate(6px,3px) rotate(0.5deg); }
+    37%{ transform:translate(-4px,2px); }
+    50%{ transform:translate(4px,-2px); }
+    62%{ transform:translate(-2px,1px); }
+    75%{ transform:translate(2px,-1px); }
+  }
+  .grid.shake{ animation:gridShake 0.4s ease; }
   .piece-cell.crystal{
     background: linear-gradient(135deg,#a8edea,#ffffff,#d4af37,#a8edea) !important;
     background-size: 200% 200% !important;
@@ -196,9 +218,10 @@
     z-index: 2;
   }
   @keyframes shatter{
-    0%{ transform:scale(1); filter:brightness(1); }
-    40%{ transform:scale(1.12); filter:brightness(2.2); box-shadow:0 0 14px 4px rgba(212,175,55,0.8); }
-    100%{ transform:scale(0.2); filter:brightness(2.6); opacity:0; }
+    0%  { transform:scale(1) rotate(0deg);    filter:brightness(1); }
+    25% { transform:scale(1.35) rotate(-4deg); filter:brightness(3.5); box-shadow:0 0 28px 10px rgba(212,175,55,1); }
+    55% { transform:scale(0.75) rotate(6deg);  filter:brightness(2.5); opacity:0.7; }
+    100%{ transform:scale(0.1) rotate(-8deg); filter:brightness(4); opacity:0; }
   }
   .tray{
     width: min(92vw, 420px);
@@ -550,9 +573,47 @@
     score += 150;
     luckySquare = null;
     showBonusText('+150 ALTIN MOZAİK!');
+    sndLucky(); flashScreen('rgba(212,175,55,0.32)');
     updateScoreUI();
     renderGrid();
     setTimeout(pickLuckySquare, 950);
+  }
+
+  /* ---------- ses ---------- */
+  let audioCtx = null;
+  function getCtx(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+  function tone(freq, dur, type, vol, delay=0){
+    if(!soundOn) return;
+    try{
+      const ctx=getCtx(), t=ctx.currentTime+delay;
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.type=type; o.frequency.setValueAtTime(freq,t);
+      g.gain.setValueAtTime(vol,t);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t); o.stop(t+dur+0.03);
+    }catch(e){}
+  }
+  let soundOn = true;
+  function sndPlace(){ tone(200,0.04,'square',0.18); tone(300,0.05,'sine',0.12,0.02); tone(130,0.09,'sine',0.09,0.01); }
+  function sndClear(n){
+    const k=1+Math.min(n-1,4)*0.15;
+    tone(90,0.05,'square',0.22,0); tone(523*k,0.20,'sine',0.20,0.02);
+    tone(659*k,0.18,'triangle',0.18,0.07); tone(784*k,0.26,'sine',0.20,0.13);
+    if(n>=2){ tone(1047*k,0.22,'sine',0.18,0.19); tone(1319*k,0.18,'sine',0.16,0.26); }
+  }
+  function sndChain(){ tone(880,0.05,'square',0.14); tone(1108,0.05,'sine',0.11,0.04); tone(1320,0.04,'sine',0.09,0.08); }
+  function sndLucky(){ [784,988,1175,1568,1976].forEach((f,i)=>tone(f,0.16,'sine',0.16,i*0.065)); }
+  function sndCrystal(){ tone(1700,0.04,'sine',0.20); tone(1275,0.07,'triangle',0.17,0.04); tone(850,0.12,'sine',0.15,0.09); tone(560,0.20,'sine',0.13,0.16); }
+
+  function flashScreen(color){
+    const el=document.createElement('div');
+    el.className='screen-flash'; el.style.background=color||'rgba(212,175,55,0.22)';
+    document.body.appendChild(el); setTimeout(()=>el.remove(),560);
+  }
+  function shakeGrid(){
+    gridEl.classList.remove('shake'); void gridEl.offsetWidth; gridEl.classList.add('shake');
+    setTimeout(()=>gridEl.classList.remove('shake'),400);
   }
 
   function showBonusText(text){
@@ -578,6 +639,7 @@
     navigator.vibrate?.([20,10,20,10,60]);
     score += cleared * 12;
     showBonusText(`+${cleared*12} KRİSTAL!`);
+    sndCrystal(); flashScreen('rgba(168,237,234,0.30)'); shakeGrid();
     updateScoreUI();
     setTimeout(()=>{
       toClear.forEach(key=>{
@@ -676,7 +738,7 @@
       shape.forEach(([dr,dc])=>{
         grid[lastRow+dr][lastCol+dc] = dragging.color;
       });
-      navigator.vibrate?.(8);
+      navigator.vibrate?.(8); sndPlace();
       if(dragging.color === lastPlacedColor){
         colorChain = Math.min(colorChain+1, 8);
       } else {
@@ -685,7 +747,7 @@
       }
       const mult = chainMultiplier();
       score += Math.round(shape.length * mult);
-      if(colorChain >= 2) showBonusText('ZİNCİR ×' + mult.toFixed(1).replace('.0',''));
+      if(colorChain >= 2){ showBonusText('ZİNCİR ×' + mult.toFixed(1).replace('.0','')); sndChain(); }
       renderChain();
       renderGrid();
       checkLuckySquare();
@@ -722,7 +784,7 @@
       const colors = new Set(grid.map(row=>row[c]).filter(v=>v&&v!==OBSTACLE_COLOR));
       if(colors.size >= 3) rainbowBonus += colors.size === 5 ? 200 : colors.size === 4 ? 100 : 50;
     });
-    if(rainbowBonus > 0) showBonusText(`+${rainbowBonus} GÖKKUŞAĞI!`);
+    if(rainbowBonus > 0){ showBonusText(`+${rainbowBonus} GÖKKUŞAĞI!`); flashScreen('rgba(80,180,255,0.22)'); }
 
     const cellsToClear = new Set();
     rows.forEach(r=>{ for(let c=0;c<SIZE;c++) cellsToClear.add(r+'_'+c); });
@@ -734,6 +796,8 @@
     });
 
     navigator.vibrate?.(totalLines > 1 ? [30,15,30] : 40);
+    sndClear(totalLines);
+    if(totalLines > 1){ shakeGrid(); flashScreen('rgba(212,175,55,0.20)'); }
     const totalLines = rows.length + cols.length;
     score += totalLines*100 + (totalLines>1 ? (totalLines-1)*50 : 0) + rainbowBonus;
     updateScoreUI();

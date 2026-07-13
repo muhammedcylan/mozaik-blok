@@ -297,22 +297,11 @@
     }
 
     @keyframes shatter {
-      0% {
-        transform: scale(1);
-        filter: brightness(1);
-      }
-
-      40% {
-        transform: scale(1.12);
-        filter: brightness(2.2);
-        box-shadow: 0 0 14px 4px rgba(212, 175, 55, 0.8);
-      }
-
-      100% {
-        transform: scale(0.2);
-        filter: brightness(2.6);
-        opacity: 0;
-      }
+      0%  { transform:scale(1) rotate(0deg);   filter:brightness(1); }
+      25% { transform:scale(1.35) rotate(-4deg); filter:brightness(3.5);
+            box-shadow:0 0 28px 10px rgba(212,175,55,1); }
+      55% { transform:scale(0.75) rotate(6deg);  filter:brightness(2.5); opacity:0.7; }
+      100%{ transform:scale(0.1) rotate(-8deg);  filter:brightness(4); opacity:0; }
     }
 
     .tray {
@@ -381,40 +370,61 @@
       position: fixed;
       z-index: 998;
       pointer-events: none;
-      font-weight: 800;
-      font-size: 26px;
-      color: var(--gold);
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(212, 175, 55, 0.5);
-      letter-spacing: 1px;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 36px;
+      color: #fff;
+      text-shadow:
+        0 0 14px var(--gold),
+        0 0 30px rgba(212,175,55,0.8),
+        0 0 60px rgba(212,175,55,0.4),
+        0 3px 8px rgba(0,0,0,0.95);
+      letter-spacing: 3px;
       transform: translate(-50%, 0);
-      animation: floatUp 1s ease forwards;
+      animation: floatUp 1.3s cubic-bezier(0.22,0.61,0.36,1) forwards;
       text-align: center;
       white-space: nowrap;
+      -webkit-text-stroke: 1px rgba(212,175,55,0.6);
     }
 
     .float-text small {
       display: block;
-      font-size: 15px;
+      font-size: 16px;
       color: var(--turquoise);
-      letter-spacing: 2px;
+      letter-spacing: 3px;
+      -webkit-text-stroke: 0;
+      text-shadow: 0 0 10px var(--turquoise), 0 2px 4px rgba(0,0,0,0.8);
     }
 
     @keyframes floatUp {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, 14px) scale(0.7);
-      }
-
-      20% {
-        opacity: 1;
-        transform: translate(-50%, 0) scale(1.08);
-      }
-
-      100% {
-        opacity: 0;
-        transform: translate(-50%, -60px) scale(1);
-      }
+      0%  { opacity:0; transform:translate(-50%, 24px) scale(0.25); }
+      16% { opacity:1; transform:translate(-50%,-12px) scale(1.35); }
+      28% { transform:translate(-50%,-8px)  scale(0.92); }
+      42% { transform:translate(-50%,-14px) scale(1.06); }
+      60% { opacity:1; transform:translate(-50%,-20px) scale(1); }
+      100%{ opacity:0; transform:translate(-50%,-95px) scale(0.8); }
     }
+
+    .screen-flash {
+      position: fixed; inset:0;
+      pointer-events: none; z-index:997;
+      animation: screenFlash 0.55s ease forwards;
+    }
+    @keyframes screenFlash {
+      0%   { opacity:1; }
+      100% { opacity:0; }
+    }
+
+    @keyframes gridShake {
+      0%,100% { transform:translate(0); }
+      12% { transform:translate(-6px,-3px) rotate(-0.5deg); }
+      25% { transform:translate(6px,3px)  rotate(0.5deg); }
+      37% { transform:translate(-4px,2px) rotate(-0.3deg); }
+      50% { transform:translate(4px,-2px) rotate(0.3deg); }
+      62% { transform:translate(-2px,1px); }
+      75% { transform:translate(2px,-1px); }
+    }
+    .grid.shake { animation: gridShake 0.4s ease; }
 
     .overlay {
       position: fixed;
@@ -1849,18 +1859,41 @@
         o.start(t); o.stop(t + dur + 0.03);
       }
 
-      function sndPlace() { tone(150, 0.07, 'square', 0.06); tone(85, 0.09, 'sine', 0.1); }
-      function sndClear(n) {
-        const k = 1 + Math.min(n - 1, 4) * 0.12; // kombo büyüdükçe tizleşir
-        tone(523 * k, 0.12, 'sine', 0.12, 0);
-        tone(659 * k, 0.12, 'sine', 0.12, 0.06);
-        tone(784 * k, 0.2, 'sine', 0.12, 0.12);
+      function sndPlace() {
+        tone(200, 0.04, 'square', 0.18);
+        tone(300, 0.05, 'sine',   0.12, 0.02);
+        tone(130, 0.09, 'sine',   0.09, 0.01);
       }
-      function sndGameOver() { tone(330, 0.25, 'sine', 0.12, 0); tone(220, 0.4, 'sine', 0.12, 0.2); }
+      function sndClear(n) {
+        const k = 1 + Math.min(n - 1, 4) * 0.15;
+        tone(90,       0.05, 'square',   0.22, 0);
+        tone(523 * k,  0.20, 'sine',     0.20, 0.02);
+        tone(659 * k,  0.18, 'triangle', 0.18, 0.07);
+        tone(784 * k,  0.26, 'sine',     0.20, 0.13);
+        if (n >= 2) {
+          tone(1047 * k, 0.22, 'sine', 0.18, 0.19);
+          tone(1319 * k, 0.18, 'sine', 0.16, 0.26);
+        }
+      }
+      function sndGameOver() { tone(330, 0.3, 'sine', 0.14, 0); tone(220, 0.5, 'sine', 0.14, 0.22); }
       function sndRecord() {
-        [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.16, 'triangle', 0.13, i * 0.09));
+        [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.18, 'triangle', 0.15, i * 0.08));
       }
       function sndTick() { tone(880, 0.04, 'square', 0.04); }
+      function sndChain() {
+        tone(880,  0.05, 'square', 0.14);
+        tone(1108, 0.05, 'sine',   0.11, 0.04);
+        tone(1320, 0.04, 'sine',   0.09, 0.08);
+      }
+      function sndLucky() {
+        [784, 988, 1175, 1568, 1976].forEach((f, i) => tone(f, 0.16, 'sine', 0.16, i * 0.065));
+      }
+      function sndCrystal() {
+        tone(1700, 0.04, 'sine',     0.20);
+        tone(1275, 0.07, 'triangle', 0.17, 0.04);
+        tone(850,  0.12, 'sine',     0.15, 0.09);
+        tone(560,  0.20, 'sine',     0.13, 0.16);
+      }
 
       function haptic(style) {
         try {
@@ -1879,6 +1912,21 @@
         el.classList.remove('bump');
         void el.offsetWidth; // animasyonu yeniden tetikle
         el.classList.add('bump');
+      }
+
+      function flashScreen(color) {
+        const el = document.createElement('div');
+        el.className = 'screen-flash';
+        el.style.background = color || 'rgba(212,175,55,0.22)';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 560);
+      }
+
+      function shakeGrid() {
+        gridEl.classList.remove('shake');
+        void gridEl.offsetWidth;
+        gridEl.classList.add('shake');
+        setTimeout(() => gridEl.classList.remove('shake'), 400);
       }
 
       function showFloat(html) {
@@ -2085,6 +2133,8 @@
         score += 150;
         luckySquare = null;
         showFloat('+150 ALTIN MOZAİK!');
+        sndLucky();
+        flashScreen('rgba(212,175,55,0.32)');
         haptic('MEDIUM');
         updateScoreUI();
         renderGrid();
@@ -2102,6 +2152,9 @@
         const cleared = [...toClear].filter(k => { const [r,c]=k.split('_').map(Number); return !!grid[r][c]; }).length;
         score += cleared * 12;
         showFloat('+' + (cleared * 12) + ' KRİSTAL!');
+        sndCrystal();
+        flashScreen('rgba(168,237,234,0.30)');
+        shakeGrid();
         haptic('MEDIUM');
         updateScoreUI();
         setTimeout(() => {
@@ -2248,7 +2301,7 @@
           }
           const cMult = chainMultiplier();
           score += Math.round(shape.length * cMult);
-          if (colorChain >= 2) showFloat('ZİNCİR ×' + cMult.toFixed(1).replace('.0', ''));
+          if (colorChain >= 2) { showFloat('ZİNCİR ×' + cMult.toFixed(1).replace('.0', '')); sndChain(); }
           renderChain();
 
           renderGrid();
@@ -2267,6 +2320,7 @@
             score += gained;
             showFloat('+' + gained + (streak >= 2 ? '<small>' + t('combo') + streak + '</small>' : ''));
             sndClear(streak);
+            if (linesCleared >= 2) { shakeGrid(); flashScreen('rgba(212,175,55,0.20)'); }
             haptic('MEDIUM');
             stats.lines += linesCleared;
             if (streak > stats.bestCombo) stats.bestCombo = streak;
@@ -2309,7 +2363,11 @@
           const colors = new Set(grid.map(row => row[c]).filter(v => v && v !== OBSTACLE_COLOR));
           if (colors.size >= 3) rainbowBonus += colors.size === 5 ? 200 : colors.size === 4 ? 100 : 50;
         });
-        if (rainbowBonus > 0) { score += rainbowBonus; showFloat('+' + rainbowBonus + ' GÖKKUŞAĞI!'); }
+        if (rainbowBonus > 0) {
+          score += rainbowBonus;
+          showFloat('+' + rainbowBonus + ' GÖKKUŞAĞI!');
+          flashScreen('rgba(80,180,255,0.22)');
+        }
 
         const cellsToClear = new Set();
         rows.forEach(r => { for (let c = 0; c < SIZE; c++) cellsToClear.add(r + '_' + c); });
