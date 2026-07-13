@@ -304,11 +304,13 @@
       }
     }
 
-    .cell.filled.obstacle {
-      background: repeating-linear-gradient(45deg,#1a2b3c,#1a2b3c 4px,#243447 4px,#243447 8px) !important;
-      border-color: rgba(80,120,160,0.3) !important;
+    .ambient-glow {
+      position: fixed; inset: 0; pointer-events: none; z-index: -1;
+      transition: background 1.4s ease;
+      background: radial-gradient(ellipse at 20% -10%, rgba(22,50,87,0.82) 0%, transparent 55%),
+                  radial-gradient(ellipse at 80% 110%, rgba(10,25,55,0.6) 0%, transparent 50%);
     }
-    .cell.filled.obstacle::after { border-color: rgba(80,120,160,0.15) !important; }
+    .grid { transition: box-shadow 1.4s ease, border-color 1.4s ease; }
     .cell.lucky {
       border-color: rgba(212,175,55,0.7) !important;
       box-shadow: inset 0 0 0 2px rgba(212,175,55,0.5), 0 0 8px rgba(212,175,55,0.25);
@@ -989,6 +991,7 @@
 </head>
 
 <body>
+  <div id="ambientGlow" class="ambient-glow"></div>
   <div class="app">
     <header>
       <div class="top-bar">
@@ -1175,7 +1178,17 @@
   <script>
     (function () {
       const SIZE = 8;
-      const PALETTE = ['#1fa9a6', '#d4af37', '#c1483b', '#8a5a9e', '#3e7cb1'];
+      let PALETTE = ['#1fa9a6', '#d4af37', '#c1483b', '#8a5a9e', '#3e7cb1'];
+
+      const THEMES = [
+        { palette:['#1fa9a6','#d4af37','#c1483b','#8a5a9e','#3e7cb1'], glow:'radial-gradient(ellipse at 20% -10%, rgba(22,50,87,0.82) 0%, transparent 55%), radial-gradient(ellipse at 80% 110%, rgba(10,25,55,0.6) 0%, transparent 50%)', border:'rgba(31,169,166,0.35)', shadow:'0 0 0 2px rgba(31,169,166,0.15), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(31,169,166,0.22)' },
+        { palette:['#ff6b35','#f7c59f','#e84855','#ff9f1c','#ffd166'], glow:'radial-gradient(ellipse at 80% 10%, rgba(80,20,10,0.9) 0%, transparent 55%), radial-gradient(ellipse at 20% 100%, rgba(60,10,5,0.7) 0%, transparent 50%)', border:'rgba(255,107,53,0.4)', shadow:'0 0 0 2px rgba(255,107,53,0.2), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(255,107,53,0.22)' },
+        { palette:['#9b5de5','#f15bb5','#00f5d4','#fee440','#00bbf9'], glow:'radial-gradient(ellipse at 50% 50%, rgba(20,5,50,0.95) 0%, transparent 60%), radial-gradient(ellipse at 90% 0%, rgba(40,5,80,0.8) 0%, transparent 45%)', border:'rgba(155,93,229,0.45)', shadow:'0 0 0 2px rgba(155,93,229,0.22), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(155,93,229,0.22)' },
+        { palette:['#2d6a4f','#52b788','#95d5b2','#b7e4c7','#74c69d'], glow:'radial-gradient(ellipse at 30% 120%, rgba(10,30,10,0.88) 0%, transparent 55%), radial-gradient(ellipse at 70% -10%, rgba(5,25,10,0.7) 0%, transparent 50%)', border:'rgba(82,183,136,0.4)', shadow:'0 0 0 2px rgba(82,183,136,0.2), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(82,183,136,0.22)' },
+        { palette:['#56cfe1','#6930c3','#5e60ce','#7400b8','#80ffdb'], glow:'radial-gradient(ellipse at 60% 20%, rgba(15,5,40,0.92) 0%, transparent 55%), radial-gradient(ellipse at 30% 100%, rgba(10,3,35,0.75) 0%, transparent 50%)', border:'rgba(86,207,225,0.4)', shadow:'0 0 0 2px rgba(86,207,225,0.2), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(86,207,225,0.22)' },
+        { palette:['#d4af37','#e8c84a','#f0d060','#b8962e','#ffed85'], glow:'radial-gradient(ellipse at 40% -5%, rgba(30,15,5,0.9) 0%, transparent 55%), radial-gradient(ellipse at 70% 110%, rgba(25,10,3,0.7) 0%, transparent 50%)', border:'rgba(212,175,55,0.5)', shadow:'0 0 0 2px rgba(212,175,55,0.25), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(212,175,55,0.22)' },
+      ];
+      let currentThemeIdx = 0;
       const BEST_KEY = 'bestScore';
       const SOUND_KEY = 'soundOn';
       const STATS_KEY = 'stats';
@@ -1184,10 +1197,6 @@
       const DAILY_KEY = 'daily';
       const TUTORIAL_KEY = 'tutorialDone';
       const REVIEW_KEY = 'reviewAsked';
-
-      const OBSTACLE_COLOR = 'obstacle';
-      const OBSTACLE_FIRST = 500;
-      const OBSTACLE_STEP  = 400;
 
       const SHAPES = [
         [[0, 0]],
@@ -1789,7 +1798,6 @@
       let pendingClears = [];      // temizleme animasyonu zamanlayıcıları
       let newSetTimer = null;
       let stats = { games: 0, lines: 0, bestCombo: 0 };
-      let nextObstacleAt = OBSTACLE_FIRST;
       let luckySquare = null;
       let colorChain = 0;
       let lastPlacedColor = null;
@@ -1979,6 +1987,21 @@
         el.classList.add('bump');
       }
 
+      function applyTheme(idx, animate) {
+        currentThemeIdx = idx;
+        const t = THEMES[idx];
+        PALETTE.splice(0, PALETTE.length, ...t.palette);
+        const glowEl = document.getElementById('ambientGlow');
+        if (glowEl) glowEl.style.background = t.glow;
+        gridEl.style.borderColor = t.border;
+        gridEl.style.boxShadow = t.shadow;
+        if (animate !== false) flashScreen(t.flash);
+      }
+
+      function rotateTheme() {
+        applyTheme((currentThemeIdx + 1) % THEMES.length, true);
+      }
+
       function flashScreen(color) {
         const el = document.createElement('div');
         el.className = 'screen-flash';
@@ -2046,8 +2069,7 @@
             const el = cellEl(r, c);
             const val = grid[r][c];
             el.classList.toggle('filled', !!val);
-            el.classList.toggle('obstacle', val === OBSTACLE_COLOR);
-            el.style.background = (val && val !== OBSTACLE_COLOR) ? val : '';
+            el.style.background = val || '';
             const inLucky = luckySquare &&
               r >= luckySquare.r0 && r <= luckySquare.r0 + 1 &&
               c >= luckySquare.c0 && c <= luckySquare.c0 + 1;
@@ -2156,21 +2178,6 @@
         const col = Math.round((left - (gridRect.left + 10)) / (cellSize + 4));
         const row = Math.round((top - (gridRect.top + 10)) / (cellSize + 4));
         return { row, col, left, top };
-      }
-
-      function addObstacles() {
-        const empty = [];
-        for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) {
-          if (!grid[r][c]) empty.push([r, c]);
-        }
-        const count = Math.min(3, Math.max(1, Math.ceil(empty.length * 0.04)));
-        for (let i = 0; i < count && empty.length > 0; i++) {
-          const idx = Math.floor(Math.random() * empty.length);
-          const [r, c] = empty.splice(idx, 1)[0];
-          grid[r][c] = OBSTACLE_COLOR;
-        }
-        renderGrid();
-        checkGameOver();
       }
 
       function pickLuckySquare() {
@@ -2385,7 +2392,8 @@
             score += gained;
             showFloat('+' + gained + (streak >= 2 ? '<small>' + t('combo') + streak + '</small>' : ''));
             sndClear(streak);
-            if (linesCleared >= 2) { shakeGrid(); flashScreen('rgba(212,175,55,0.20)'); }
+            rotateTheme();
+            if (linesCleared >= 2) { shakeGrid(); }
             haptic('MEDIUM');
             stats.lines += linesCleared;
             if (streak > stats.bestCombo) stats.bestCombo = streak;
@@ -2421,11 +2429,11 @@
 
         let rainbowBonus = 0;
         rows.forEach(r => {
-          const colors = new Set(grid[r].filter(v => v && v !== OBSTACLE_COLOR));
+          const colors = new Set(grid[r].filter(v => v));
           if (colors.size >= 3) rainbowBonus += colors.size === 5 ? 200 : colors.size === 4 ? 100 : 50;
         });
         cols.forEach(c => {
-          const colors = new Set(grid.map(row => row[c]).filter(v => v && v !== OBSTACLE_COLOR));
+          const colors = new Set(grid.map(row => row[c]).filter(v => v));
           if (colors.size >= 3) rainbowBonus += colors.size === 5 ? 200 : colors.size === 4 ? 100 : 50;
         });
         if (rainbowBonus > 0) {
@@ -2474,10 +2482,6 @@
       function updateScoreUI() {
         scoreEl.textContent = score;
         bumpScore(scoreEl);
-        if (score >= nextObstacleAt) {
-          nextObstacleAt += OBSTACLE_STEP;
-          setTimeout(addObstacles, 420);
-        }
         // Klasik modda genel rekor, günlük modda günün rekoru izlenir.
         const prevTop = (mode === 'daily') ? dailyStore.score : best;
         if (score > prevTop) {
@@ -2564,10 +2568,10 @@
         rescueUsed = false;
         gameCounted = false;
         recordCelebrated = false;
-        nextObstacleAt = OBSTACLE_FIRST;
         luckySquare = null;
         colorChain = 0; lastPlacedColor = null; roundCount = 0;
         renderChain();
+        applyTheme(0, false);
         recordAtStart = (mode === 'daily') ? dailyStore.score : best;
         scoreEl.textContent = 0;
         bestEl.textContent = (mode === 'daily') ? dailyStore.score : best;
