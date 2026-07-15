@@ -291,10 +291,11 @@
     }
 
     @keyframes cellPop {
-      0%   { transform: scale(0.5);  filter: brightness(2.8); }
-      40%  { transform: scale(1.32); filter: brightness(1.8); }
-      65%  { transform: scale(0.91); filter: brightness(1.2); }
-      80%  { transform: scale(1.06); }
+      0%   { transform: scale(0.15); filter: brightness(5); }
+      28%  { transform: scale(1.55); filter: brightness(2.2); }
+      50%  { transform: scale(0.86); filter: brightness(1.4); }
+      68%  { transform: scale(1.10); }
+      82%  { transform: scale(0.96); }
       100% { transform: scale(1);    filter: brightness(1); }
     }
 
@@ -518,6 +519,36 @@
       75% { transform:translate(2px,-1px); }
     }
     .grid.shake { animation: gridShake 0.4s ease; }
+
+    /* ---------- Tehlike Modu ---------- */
+    @keyframes dangerPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(193,72,59,0); border-color: rgba(193,72,59,0.4); }
+      50%       { box-shadow: 0 0 44px 10px rgba(193,72,59,0.65), 0 0 0 3px rgba(193,72,59,0.85); border-color: rgba(193,72,59,1); }
+    }
+    .grid.danger {
+      animation: dangerPulse 0.9s ease-in-out infinite !important;
+      transition: none !important;
+    }
+
+    /* ---------- Mükemmel Temizleme ---------- */
+    .float-text.perfect-clear {
+      font-size: 50px;
+      -webkit-text-stroke: 2px rgba(80,255,200,0.9);
+      text-shadow:
+        0 0 20px #0ff,
+        0 0 55px rgba(80,255,210,1),
+        0 0 100px rgba(80,200,255,0.6),
+        0 5px 14px rgba(0,0,0,1);
+      animation: perfectPop 2.2s cubic-bezier(0.22,0.61,0.36,1) forwards;
+    }
+    @keyframes perfectPop {
+      0%  { opacity:0; transform:translate(-50%, 20px) scale(0.1); }
+      12% { opacity:1; transform:translate(-50%,-10px) scale(2.0); }
+      22% { transform:translate(-50%,-4px) scale(0.82); }
+      36% { transform:translate(-50%,-22px) scale(1.14); }
+      60% { opacity:1; transform:translate(-50%,-30px) scale(1); }
+      100%{ opacity:0; transform:translate(-50%,-160px) scale(0.7); }
+    }
 
     .overlay {
       position: fixed;
@@ -1976,10 +2007,10 @@
       }
 
       function sndPlace() {
-        tone(55,  0.06, 'sine',     0.28);
-        tone(110, 0.05, 'square',   0.14, 0.01);
-        tone(220, 0.04, 'square',   0.10, 0.02);
-        tone(440, 0.02, 'sine',     0.06, 0.01);
+        tone(65,  0.10, 'sine',     0.40);
+        tone(130, 0.08, 'square',   0.22, 0.01);
+        tone(260, 0.06, 'square',   0.14, 0.02);
+        tone(520, 0.04, 'sine',     0.09, 0.01);
       }
       function sndClear(lines, streak) {
         const k  = 1 + Math.min((streak || 1) - 1, 5) * 0.18;
@@ -2082,20 +2113,22 @@
         const rect = el.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top  + rect.height / 2;
-        const count = 7;
+        const count = 13;
         for (let i = 0; i < count; i++) {
           const p = document.createElement('div');
           p.className = 'cell-particle';
           p.style.left = cx + 'px';
           p.style.top  = cy + 'px';
-          p.style.background = color || '#fff';
-          const angle = (i / count) * Math.PI * 2 + Math.random() * 0.8;
-          const dist  = 16 + Math.random() * 28;
+          p.style.background = (i % 3 === 0) ? '#fff' : (color || '#fff');
+          const angle = (i / count) * Math.PI * 2 + Math.random() * 0.6;
+          const dist  = 22 + Math.random() * 44;
           p.style.setProperty('--pdx', (Math.cos(angle) * dist) + 'px');
           p.style.setProperty('--pdy', (Math.sin(angle) * dist) + 'px');
-          p.style.animationDuration = (0.4 + Math.random() * 0.22) + 's';
+          p.style.animationDuration = (0.42 + Math.random() * 0.28) + 's';
+          p.style.width  = (5 + Math.random() * 4) + 'px';
+          p.style.height = (5 + Math.random() * 4) + 'px';
           document.body.appendChild(p);
-          setTimeout(() => p.remove(), 650);
+          setTimeout(() => p.remove(), 750);
         }
       }
 
@@ -2114,6 +2147,61 @@
         void gridEl.offsetWidth;
         gridEl.classList.add('shake');
         setTimeout(() => gridEl.classList.remove('shake'), 400);
+      }
+
+      let dangerWarned = false;
+
+      function checkDanger() {
+        const filled = grid.reduce((sum, row) => sum + row.filter(Boolean).length, 0);
+        const pct = filled / (SIZE * SIZE);
+        if (pct >= 0.70) {
+          if (!gridEl.classList.contains('danger')) {
+            gridEl.classList.add('danger');
+            if (!dangerWarned) { dangerWarned = true; sndDanger(); haptic('MEDIUM'); }
+          }
+        } else {
+          gridEl.classList.remove('danger');
+          dangerWarned = false;
+        }
+      }
+
+      function checkPerfectClear() {
+        if (!grid.every(row => row.every(cell => !cell))) return;
+        const bonus = 1000 + streak * 200;
+        score += bonus;
+        updateScoreUI();
+        if (!gridRect) updateGridRect();
+        const el = document.createElement('div');
+        el.className = 'float-text perfect-clear';
+        el.innerHTML = '✨ MÜKEMMEL! ✨<small>+' + bonus + '</small>';
+        el.style.left = (gridRect.left + gridRect.width / 2) + 'px';
+        el.style.top  = (gridRect.top  + gridRect.height * 0.28) + 'px';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 2300);
+        flashScreen('rgba(80,255,200,0.30)');
+        shakeGrid();
+        sndPerfect();
+        haptic('HEAVY');
+        for (let r = 0; r < SIZE; r += 2) {
+          for (let c = 0; c < SIZE; c += 2) {
+            const delay = r * 30 + c * 12;
+            setTimeout(() => spawnCellParticles(r, c, PALETTE[Math.floor(Math.random() * PALETTE.length)]), delay);
+          }
+        }
+      }
+
+      function sndDanger() {
+        tone(75,  0.12, 'sawtooth', 0.38);
+        tone(58,  0.16, 'sine',     0.32, 0.05);
+        tone(75,  0.10, 'sawtooth', 0.22, 0.22);
+        tone(58,  0.12, 'sine',     0.18, 0.27);
+      }
+
+      function sndPerfect() {
+        tone(55,  0.20, 'sine', 0.5);
+        tone(110, 0.16, 'sine', 0.38, 0.02);
+        [523, 659, 784, 988, 1319, 1568].forEach((f, i) => tone(f, 0.24, 'triangle', 0.24, i * 0.07));
+        [2093, 2637].forEach((f, i) => tone(f, 0.38, 'sine', 0.15, 0.46 + i * 0.07));
       }
 
       function showFloat(html) {
@@ -2517,6 +2605,7 @@
             haptic('LIGHT');
           }
           updateScoreUI();
+          checkDanger();
 
           if (pieces.every(p => p.used)) {
             newSetTimer = setTimeout(() => { newSetTimer = null; newPieceSet(); }, 120);
@@ -2575,6 +2664,8 @@
             cellEl(r, c).classList.remove('clearing');
           });
           renderGrid();
+          checkDanger();
+          checkPerfectClear();
         }, 380);
         pendingClears.push(entry);
 
@@ -2685,6 +2776,8 @@
         recordCelebrated = false;
         luckySquare = null;
         colorChain = 0; lastPlacedColor = null; roundCount = 0;
+        gridEl.classList.remove('danger');
+        dangerWarned = false;
         renderChain();
         applyTheme(0, false);
         recordAtStart = (mode === 'daily') ? dailyStore.score : best;
