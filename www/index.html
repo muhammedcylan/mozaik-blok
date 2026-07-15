@@ -399,6 +399,13 @@
       justify-content: center;
       height: 100px;
       position: relative;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    .piece-slot:empty,
+    .piece-slot:not(:has(.piece)) {
+      cursor: default;
     }
 
     .piece {
@@ -2221,7 +2228,7 @@
                 pieceEl.appendChild(cd);
               }
             }
-            pieceEl.addEventListener('pointerdown', (e) => startDrag(e, idx, pieceEl));
+            slot.addEventListener('pointerdown', (e) => startDrag(e, idx, pieceEl));
             slot.appendChild(pieceEl);
           }
           trayEl.appendChild(slot);
