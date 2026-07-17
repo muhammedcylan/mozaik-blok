@@ -39,10 +39,8 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      background:
-        radial-gradient(ellipse at 20% -10%, #163257 0%, transparent 55%),
-        radial-gradient(ellipse at 100% 110%, #0d2140 0%, transparent 50%),
-        var(--bg);
+      background: var(--bg);
+      transition: background 1.6s ease;
       color: var(--cream);
       font-family: 'Inter', sans-serif;
       overflow-x: hidden;
@@ -1255,12 +1253,12 @@
       let PALETTE = ['#1fa9a6', '#d4af37', '#c1483b', '#8a5a9e', '#3e7cb1'];
 
       const THEMES = [
-        { palette:['#1fa9a6','#d4af37','#c1483b','#8a5a9e','#3e7cb1'], glow:'radial-gradient(ellipse at 20% -10%, rgba(22,50,87,0.82) 0%, transparent 55%), radial-gradient(ellipse at 80% 110%, rgba(10,25,55,0.6) 0%, transparent 50%)', border:'rgba(31,169,166,0.35)', shadow:'0 0 0 2px rgba(31,169,166,0.15), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(31,169,166,0.22)' },
-        { palette:['#ff6b35','#f7c59f','#e84855','#ff9f1c','#ffd166'], glow:'radial-gradient(ellipse at 80% 10%, rgba(80,20,10,0.9) 0%, transparent 55%), radial-gradient(ellipse at 20% 100%, rgba(60,10,5,0.7) 0%, transparent 50%)', border:'rgba(255,107,53,0.4)', shadow:'0 0 0 2px rgba(255,107,53,0.2), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(255,107,53,0.22)' },
-        { palette:['#9b5de5','#f15bb5','#00f5d4','#fee440','#00bbf9'], glow:'radial-gradient(ellipse at 50% 50%, rgba(20,5,50,0.95) 0%, transparent 60%), radial-gradient(ellipse at 90% 0%, rgba(40,5,80,0.8) 0%, transparent 45%)', border:'rgba(155,93,229,0.45)', shadow:'0 0 0 2px rgba(155,93,229,0.22), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(155,93,229,0.22)' },
-        { palette:['#2d6a4f','#52b788','#95d5b2','#b7e4c7','#74c69d'], glow:'radial-gradient(ellipse at 30% 120%, rgba(10,30,10,0.88) 0%, transparent 55%), radial-gradient(ellipse at 70% -10%, rgba(5,25,10,0.7) 0%, transparent 50%)', border:'rgba(82,183,136,0.4)', shadow:'0 0 0 2px rgba(82,183,136,0.2), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(82,183,136,0.22)' },
-        { palette:['#56cfe1','#6930c3','#5e60ce','#7400b8','#80ffdb'], glow:'radial-gradient(ellipse at 60% 20%, rgba(15,5,40,0.92) 0%, transparent 55%), radial-gradient(ellipse at 30% 100%, rgba(10,3,35,0.75) 0%, transparent 50%)', border:'rgba(86,207,225,0.4)', shadow:'0 0 0 2px rgba(86,207,225,0.2), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(86,207,225,0.22)' },
-        { palette:['#d4af37','#e8c84a','#f0d060','#b8962e','#ffed85'], glow:'radial-gradient(ellipse at 40% -5%, rgba(30,15,5,0.9) 0%, transparent 55%), radial-gradient(ellipse at 70% 110%, rgba(25,10,3,0.7) 0%, transparent 50%)', border:'rgba(212,175,55,0.5)', shadow:'0 0 0 2px rgba(212,175,55,0.25), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(212,175,55,0.22)' },
+        { bg:'#0b1f3a', palette:['#1fa9a6','#d4af37','#c1483b','#8a5a9e','#3e7cb1'], glow:'radial-gradient(ellipse at 20% -10%, rgba(22,50,87,0.82) 0%, transparent 55%), radial-gradient(ellipse at 80% 110%, rgba(10,25,55,0.6) 0%, transparent 50%)', border:'rgba(31,169,166,0.35)', shadow:'0 0 0 2px rgba(31,169,166,0.15), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(31,169,166,0.22)' },
+        { bg:'#1a0804', palette:['#ff6b35','#f7c59f','#e84855','#ff9f1c','#ffd166'], glow:'radial-gradient(ellipse at 80% 10%, rgba(80,20,10,0.9) 0%, transparent 55%), radial-gradient(ellipse at 20% 100%, rgba(60,10,5,0.7) 0%, transparent 50%)', border:'rgba(255,107,53,0.4)', shadow:'0 0 0 2px rgba(255,107,53,0.2), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(255,107,53,0.22)' },
+        { bg:'#0c0320', palette:['#9b5de5','#f15bb5','#00f5d4','#fee440','#00bbf9'], glow:'radial-gradient(ellipse at 50% 50%, rgba(20,5,50,0.95) 0%, transparent 60%), radial-gradient(ellipse at 90% 0%, rgba(40,5,80,0.8) 0%, transparent 45%)', border:'rgba(155,93,229,0.45)', shadow:'0 0 0 2px rgba(155,93,229,0.22), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(155,93,229,0.22)' },
+        { bg:'#030e05', palette:['#2d6a4f','#52b788','#95d5b2','#b7e4c7','#74c69d'], glow:'radial-gradient(ellipse at 30% 120%, rgba(10,30,10,0.88) 0%, transparent 55%), radial-gradient(ellipse at 70% -10%, rgba(5,25,10,0.7) 0%, transparent 50%)', border:'rgba(82,183,136,0.4)', shadow:'0 0 0 2px rgba(82,183,136,0.2), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(82,183,136,0.22)' },
+        { bg:'#03061a', palette:['#56cfe1','#6930c3','#5e60ce','#7400b8','#80ffdb'], glow:'radial-gradient(ellipse at 60% 20%, rgba(15,5,40,0.92) 0%, transparent 55%), radial-gradient(ellipse at 30% 100%, rgba(10,3,35,0.75) 0%, transparent 50%)', border:'rgba(86,207,225,0.4)', shadow:'0 0 0 2px rgba(86,207,225,0.2), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(86,207,225,0.22)' },
+        { bg:'#130c02', palette:['#d4af37','#e8c84a','#f0d060','#b8962e','#ffed85'], glow:'radial-gradient(ellipse at 40% -5%, rgba(30,15,5,0.9) 0%, transparent 55%), radial-gradient(ellipse at 70% 110%, rgba(25,10,3,0.7) 0%, transparent 50%)', border:'rgba(212,175,55,0.5)', shadow:'0 0 0 2px rgba(212,175,55,0.25), 0 8px 40px rgba(0,0,0,0.7)', flash:'rgba(212,175,55,0.22)' },
       ];
       let currentThemeIdx = 0;
       const BEST_KEY = 'bestScore';
@@ -1273,7 +1271,6 @@
       const REVIEW_KEY = 'reviewAsked';
 
       const SHAPES = [
-        [[0, 0]],
         [[0, 0], [0, 1]],
         [[0, 0], [1, 0]],
         [[0, 0], [0, 1], [0, 2]],
@@ -2078,6 +2075,7 @@
         PALETTE.splice(0, PALETTE.length, ...t.palette);
         const glowEl = document.getElementById('ambientGlow');
         if (glowEl) glowEl.style.background = t.glow;
+        document.documentElement.style.setProperty('--bg', t.bg);
         gridEl.style.borderColor = t.border;
         gridEl.style.boxShadow = t.shadow;
         if (animate !== false) flashScreen(t.flash);
