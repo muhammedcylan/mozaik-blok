@@ -746,7 +746,7 @@
     navigator.vibrate?.([20,10,20,10,60]);
     score += cleared * 12;
     showBonusText(`+${cleared*12} KRİSTAL!`);
-    sndCrystal(); flashScreen('rgba(168,237,234,0.30)'); shakeGrid();
+    sndCrystal(); flashScreen('rgba(168,237,234,0.30)');
     updateScoreUI();
     setTimeout(()=>{
       toClear.forEach(key=>{
@@ -938,7 +938,6 @@
     navigator.vibrate?.(totalLines > 1 ? [30,15,30] : 40);
     sndClear(totalLines, 1);
     rotateTheme();
-    if(totalLines > 1){ shakeGrid(); }
     if(totalLines >= 2){
       const lbl = document.createElement('div');
       lbl.className = 'bonus-popup combo-label';

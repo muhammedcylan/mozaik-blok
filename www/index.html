@@ -2434,7 +2434,6 @@
         showFloat('+' + (cleared * 12) + ' KRİSTAL!');
         sndCrystal();
         flashScreen('rgba(168,237,234,0.30)');
-        shakeGrid();
         haptic('MEDIUM');
         updateScoreUI();
         setTimeout(() => {
@@ -2646,7 +2645,6 @@
             showFloat('+' + gained + streakTag);
             sndClear(linesCleared, streak);
             rotateTheme();
-            if (linesCleared >= 2) { shakeGrid(); }
             haptic('MEDIUM');
             stats.lines += linesCleared;
             if (streak > stats.bestCombo) stats.bestCombo = streak;
